@@ -78,7 +78,7 @@
 </script>
 
 <svelte:head>
-	<title>{lesson.title} • AI Classroom</title>
+	<title>{lesson.title} • Science Bridge AI</title>
 </svelte:head>
 
 <main class="relative min-h-screen overflow-hidden bg-slate-950 text-slate-100">

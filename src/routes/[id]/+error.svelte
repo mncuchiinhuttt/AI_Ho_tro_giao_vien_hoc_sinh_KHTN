@@ -15,7 +15,7 @@
 </script>
 
 <svelte:head>
-	<title>{title} • AI Classroom</title>
+	<title>{title} • Science Bridge AI</title>
 </svelte:head>
 
 <main class="relative min-h-screen overflow-hidden bg-slate-950 text-slate-100">

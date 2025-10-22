@@ -8,7 +8,7 @@
 	};
 
 	let {
-		appName = 'AI Classroom',
+		appName = 'Science Bridge AI',
 		user = null
 	}: {
 		appName?: string;

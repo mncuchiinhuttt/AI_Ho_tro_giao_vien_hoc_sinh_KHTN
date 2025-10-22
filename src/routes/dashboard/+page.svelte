@@ -185,12 +185,12 @@
 </script>
 
 <svelte:head>
-	<title>Dashboard • AI Classroom</title>
+	<title>Dashboard • Science Bridge AI</title>
 </svelte:head>
 
 <main class="min-h-screen bg-slate-950 text-slate-100">
 	<DashboardNavbar
-		appName="AI Classroom"
+		appName="Science Bridge AI"
 		user={{ id: data.user.id, username: data.user.username }}
 	/>
 

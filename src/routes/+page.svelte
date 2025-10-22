@@ -22,7 +22,7 @@
 </script>
 
 <svelte:head>
-	<title>AI Classroom</title>
+	<title>Science Bridge AI</title>
 </svelte:head>
 
 <main class="relative min-h-screen overflow-hidden bg-slate-950">
@@ -40,7 +40,7 @@
 				Teach science in English with AI support
 			</h1>
 			<p class="mx-auto text-lg leading-relaxed text-slate-300 md:mx-0">
-				Transform Vietnamese science documents into English-ready lesson plans, study packets, and vocabulary lists in minutes. AI Classroom keeps bilingual learning on track for teachers and students.
+				Transform Vietnamese science documents into English-ready lesson plans, study packets, and vocabulary lists in minutes. Science Bridge AI keeps bilingual learning on track for teachers and students.
 			</p>
 			<ul class="grid gap-4 text-left text-sm text-slate-200 md:grid-cols-2">
 				<li class="flex items-start gap-3">
