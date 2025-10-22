@@ -8,6 +8,7 @@ import { Buffer } from 'node:buffer';
 import { GoogleGenAI, Type } from "@google/genai";
 import { mainPrompt } from '$lib/assets/prompt';
 import { GOOGLE_API_KEY } from '$env/static/private';
+import { eq, desc } from 'drizzle-orm';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.user) {
@@ -18,8 +19,20 @@ export const load: PageServerLoad = async ({ locals }) => {
 		throw redirect(302, '/verify');
 	}
 
+	// Fetch user's lessons
+	const userLessons = await db
+		.select({
+			id: table.lesson.id,
+			title: table.lesson.title,
+			createdAt: table.lesson.createdAt
+		})
+		.from(table.lesson)
+		.where(eq(table.lesson.creatorId, locals.user.id))
+		.orderBy(desc(table.lesson.createdAt));
+
 	return {
-		user: locals.user
+		user: locals.user,
+		lessons: userLessons
 	};
 };
 

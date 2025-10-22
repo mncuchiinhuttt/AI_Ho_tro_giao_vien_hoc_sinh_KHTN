@@ -720,12 +720,74 @@ const createAlphaListParagraph = (
 	});
 };
 
+const splitTableCells = (line: string): string[] => {
+	const cells: string[] = [];
+	let currentCell = '';
+	let inEquation = false;
+	let equationDelimiter = '';
+
+	for (let i = 0; i < line.length; i++) {
+		const char = line[i];
+		const nextChar = line[i + 1];
+
+		// Check for equation delimiters
+		if (char === '$') {
+			if (nextChar === '$' && !inEquation) {
+				// Starting $$
+				inEquation = true;
+				equationDelimiter = '$$';
+				currentCell += '$$';
+				i++; // Skip next $
+				continue;
+			} else if (inEquation && equationDelimiter === '$$' && nextChar === '$') {
+				// Ending $$
+				inEquation = false;
+				equationDelimiter = '';
+				currentCell += '$$';
+				i++; // Skip next $
+				continue;
+			} else if (!inEquation) {
+				// Starting single $
+				inEquation = true;
+				equationDelimiter = '$';
+				currentCell += '$';
+				continue;
+			} else if (inEquation && equationDelimiter === '$') {
+				// Ending single $
+				inEquation = false;
+				equationDelimiter = '';
+				currentCell += '$';
+				continue;
+			}
+		}
+
+		// Only treat | as cell separator if not inside equation
+		if (char === '|' && !inEquation) {
+			cells.push(currentCell);
+			currentCell = '';
+		} else {
+			currentCell += char;
+		}
+	}
+
+	// Add the last cell
+	if (currentCell) {
+		cells.push(currentCell);
+	}
+
+	return cells.map(cell => cell.trim());
+};
+
 const createTable = (lines: string[], fontFamily: string, size: number): Table => {
 	const rows = lines
 		.filter((line) => !isSeparatorRow(line))
 		.map((line) => line.trim())
 		.filter(Boolean)
-		.map((line) => line.replace(/^\||\|$/g, '').split('|').map((cell) => cell.trim()));
+		.map((line) => {
+			// Remove leading and trailing |
+			const cleaned = line.replace(/^\||\|$/g, '');
+			return splitTableCells(cleaned);
+		});
 
 	if (!rows.length) {
 		return new Table({

@@ -357,5 +357,48 @@
 				</Button>
 			</form>
 		{/if}
+
+		<!-- Lesson History Section -->
+		<div class="mt-16">
+			<h2 class="text-2xl font-semibold tracking-tight">Your Lessons</h2>
+			<p class="mt-2 text-sm text-slate-400">
+				View and access all lessons you've created.
+			</p>
+
+			{#if data.lessons && data.lessons.length > 0}
+				<div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+					{#each data.lessons as lesson}
+						<div
+							class="group rounded-xl border border-white/10 bg-slate-900/40 p-6 transition-all hover:border-white/20 hover:bg-slate-900/60 hover:shadow-lg flex flex-col"
+						>
+							<div class="flex-1 space-y-2">
+								<h3 class="text-lg font-semibold text-slate-100 line-clamp-2">
+									{lesson.title}
+								</h3>
+								<p class="text-xs text-slate-400">
+									Created {new Date(lesson.createdAt).toLocaleDateString('en-US', {
+										month: 'short',
+										day: 'numeric',
+										year: 'numeric'
+									})}
+								</p>
+							</div>
+							<a
+								href="/{lesson.id}"
+								class="mt-4 inline-flex items-center justify-center rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-sky-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 w-full"
+							>
+								Open lesson
+							</a>
+						</div>
+					{/each}
+				</div>
+			{:else}
+				<div class="mt-6 rounded-xl border border-dashed border-white/10 bg-white/5 p-12 text-center">
+					<p class="text-sm text-slate-400">
+						No lessons yet. Create your first lesson above to get started!
+					</p>
+				</div>
+			{/if}
+		</div>
 	</section>
 </main>
