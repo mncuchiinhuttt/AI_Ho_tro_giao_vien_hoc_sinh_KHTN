@@ -7,6 +7,13 @@
 	import { Root as InputGroup, InputGroupInput, InputGroupButton } from '$lib/components/ui/input-group';
 	import { toast } from 'svelte-sonner';
 	import type { PageServerData } from './$types';
+	import {
+		Select,
+		SelectContent,
+		SelectItem,
+		SelectTrigger,
+	} from '$lib/components/ui/select';
+	import SelectLabel from '$lib/components/ui/select/select-label.svelte';
 
 	const MAX_FILES = 10;
 	const ACCEPTED_EXTENSIONS = ['.pdf', '.png', '.jpg', '.jpeg', '.gif', '.webp'];
@@ -18,6 +25,7 @@
 	let dragDepth = 0;
 	let submissionState = $state<'idle' | 'creating' | 'complete'>('idle');
 	let lessonLink = $state('');
+	let selectedModel = $state<string>('');
 
 	const formatFileSize = (size: number) => {
 		const units = ['B', 'KB', 'MB', 'GB'];
@@ -161,19 +169,20 @@
 		}
 
 		files.forEach((file) => formData.append('files', file));
+		formData.append('model', selectedModel);
 
 		submissionState = 'creating';
 
 		return async ({ result }) => {
 			if (result.type === 'success' && result.data?.success && result.data.lessonId) {
-				lessonLink = `http://localhost:5173/${result.data.lessonId}`;
+				lessonLink = `${window.location.origin}/${result.data.lessonId}`;
 				submissionState = 'complete';
 				files = [];
 				dragActive = false;
 				toast.success('Lesson created successfully');
 			} else {
 				submissionState = 'idle';
-				toast.error(result.type === 'error' && result.error?.message ? result.error.message : 'Failed to create lesson.');
+				toast.error('AI service is currently unavailable or failed to generate content. Please try again later.');
 			}
 		};
 	};
@@ -199,6 +208,27 @@
 		<p class="mt-3 text-base text-slate-300">
 			Your user ID is <span class="font-mono text-slate-100">{data.user.id}</span>.
 		</p>
+
+		<div class="mt-6 flex items-center gap-3">
+			<label for="model-select" class="text-sm font-medium text-slate-300">AI Model:</label>
+			<Select type="single" bind:value={selectedModel} disabled={submissionState === 'creating'}>
+				<SelectTrigger id="model-select" class="w-64 bg-slate-900/60 border-white/10">
+					{#if selectedModel === 'gemini-flash-latest'}
+						Gemini Flash
+					{:else if selectedModel === 'gemini-2.5-pro'}
+						Gemini 2.5 Pro
+					{:else}
+						Select a model
+					{/if}
+				</SelectTrigger>
+				<SelectContent>
+					<SelectLabel>Select a model</SelectLabel>
+					<SelectItem value="gemini-flash-latest">Gemini Flash</SelectItem>
+					<SelectItem value="gemini-2.5-pro">Gemini 2.5 Pro</SelectItem>
+				</SelectContent>
+			</Select>
+		</div>
+
 		<div class="mt-10">
 			{#if submissionState === 'complete'}
 				<div

@@ -31,6 +31,8 @@ export const actions: Actions = {
 
 		const formData = await request.formData();
 		const uploadedEntries = formData.getAll('files');
+		const selectedModel = formData.get('model')?.toString() || 'gemini-flash-latest';
+		
 		const attachments = await Promise.all(
 			uploadedEntries
 				.filter((entry): entry is File => entry instanceof File)
@@ -65,43 +67,53 @@ export const actions: Actions = {
 			apiKey: GOOGLE_API_KEY
 		});
 
-		const response = await ai.models.generateContent({
-			model: 'gemini-flash-latest',
-			contents: contents,
-			config: {
-				responseMimeType: "application/json",
-				responseSchema: {
-					type: Type.OBJECT,
-					properties: {
-						study_content: {
-							type: Type.STRING
-						},
-						vocabulary: {
-							type: Type.ARRAY,
-							items: {
-								type: Type.OBJECT,
-								properties: {
-									word: { type: Type.STRING },
-									ipa: { type: Type.STRING },
-									english: { type: Type.STRING },
-									vietnamese: { type: Type.STRING }
-								},
-								required: ['word', 'ipa', 'english', 'vietnamese'],
-								propertyOrdering: ['word', 'ipa', 'english', 'vietnamese']
+		let response;
+		try {
+			response = await ai.models.generateContent({
+				model: selectedModel,
+				contents: contents,
+				config: {
+					responseMimeType: 'application/json',
+					responseSchema: {
+						type: Type.OBJECT,
+						properties: {
+							study_content: {
+								type: Type.STRING
+							},
+							vocabulary: {
+								type: Type.ARRAY,
+								items: {
+									type: Type.OBJECT,
+									properties: {
+										word: { type: Type.STRING },
+										ipa: { type: Type.STRING },
+										english: { type: Type.STRING },
+										vietnamese: { type: Type.STRING }
+									},
+									required: ['word', 'ipa', 'english', 'vietnamese'],
+									propertyOrdering: ['word', 'ipa', 'english', 'vietnamese']
+								}
+							},
+							lesson_plan: {
+								type: Type.STRING
+							},
+							title: {
+								type: Type.STRING
 							}
 						},
-						lesson_plan: {
-							type: Type.STRING
-						},
-						title: {
-							type: Type.STRING
-						}
-					},
-					required: ['study_content', 'vocabulary', 'lesson_plan', 'title'],
-					propertyOrdering: ['title', 'lesson_plan', 'study_content', 'vocabulary']
+						required: ['study_content', 'vocabulary', 'lesson_plan', 'title'],
+						propertyOrdering: ['title', 'lesson_plan', 'study_content', 'vocabulary']
+					}
 				}
-			}
-		});
+			});
+		} catch (e) {
+			console.error(e);
+			return fail(503, { message: 'Gemini is currently unavailable. Please try again later.' });
+		}
+
+		if (!response.candidates || response.candidates.length === 0) {
+			throw fail(503, { message: 'Gemini is currently unavailable. Please try again later.' });
+		}
 
 		const candidate = response.candidates?.[0];
 		const textPart = candidate?.content?.parts?.find(

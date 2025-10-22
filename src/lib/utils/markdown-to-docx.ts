@@ -115,11 +115,88 @@ const latexReplacements: Array<{
 	{ pattern: /\\ln\b/g, replace: 'ln' },
 	{ pattern: /\\log\b/g, replace: 'log' },
 	{ pattern: /\\sqrt\s*\{([^}]*)\}/g, replace: (_, value) => `√(${value})` },
+	{ pattern: /\\sqrt\[([^\]]+)\]\s*\{([^}]*)\}/g, replace: (_, root, value) => `${root}√(${value})` },
 	{ pattern: /\\leq/g, replace: '≤' },
 	{ pattern: /\\geq/g, replace: '≥' },
 	{ pattern: /\\neq/g, replace: '≠' },
+	{ pattern: /\\approx/g, replace: '≈' },
+	{ pattern: /\\equiv/g, replace: '≡' },
 	{ pattern: /\\pm/g, replace: '±' },
-	{ pattern: /\\sum/g, replace: '∑' }
+	{ pattern: /\\mp/g, replace: '∓' },
+	{ pattern: /\\sum/g, replace: '∑' },
+	{ pattern: /\\prod/g, replace: '∏' },
+	{ pattern: /\\int/g, replace: '∫' },
+	{ pattern: /\\oint/g, replace: '∮' },
+	{ pattern: /\\partial/g, replace: '∂' },
+	{ pattern: /\\nabla/g, replace: '∇' },
+	{ pattern: /\\infty/g, replace: '∞' },
+	{ pattern: /\\alpha/g, replace: 'α' },
+	{ pattern: /\\beta/g, replace: 'β' },
+	{ pattern: /\\gamma/g, replace: 'γ' },
+	{ pattern: /\\Gamma/g, replace: 'Γ' },
+	{ pattern: /\\delta/g, replace: 'δ' },
+	{ pattern: /\\Delta/g, replace: 'Δ' },
+	{ pattern: /\\epsilon/g, replace: 'ε' },
+	{ pattern: /\\varepsilon/g, replace: 'ε' },
+	{ pattern: /\\zeta/g, replace: 'ζ' },
+	{ pattern: /\\eta/g, replace: 'η' },
+	{ pattern: /\\theta/g, replace: 'θ' },
+	{ pattern: /\\Theta/g, replace: 'Θ' },
+	{ pattern: /\\vartheta/g, replace: 'θ' },
+	{ pattern: /\\iota/g, replace: 'ι' },
+	{ pattern: /\\kappa/g, replace: 'κ' },
+	{ pattern: /\\lambda/g, replace: 'λ' },
+	{ pattern: /\\Lambda/g, replace: 'Λ' },
+	{ pattern: /\\mu/g, replace: 'μ' },
+	{ pattern: /\\nu/g, replace: 'ν' },
+	{ pattern: /\\xi/g, replace: 'ξ' },
+	{ pattern: /\\Xi/g, replace: 'Ξ' },
+	{ pattern: /\\pi/g, replace: 'π' },
+	{ pattern: /\\Pi/g, replace: 'Π' },
+	{ pattern: /\\rho/g, replace: 'ρ' },
+	{ pattern: /\\sigma/g, replace: 'σ' },
+	{ pattern: /\\Sigma/g, replace: 'Σ' },
+	{ pattern: /\\tau/g, replace: 'τ' },
+	{ pattern: /\\upsilon/g, replace: 'υ' },
+	{ pattern: /\\Upsilon/g, replace: 'Υ' },
+	{ pattern: /\\phi/g, replace: 'φ' },
+	{ pattern: /\\Phi/g, replace: 'Φ' },
+	{ pattern: /\\varphi/g, replace: 'φ' },
+	{ pattern: /\\chi/g, replace: 'χ' },
+	{ pattern: /\\psi/g, replace: 'ψ' },
+	{ pattern: /\\Psi/g, replace: 'Ψ' },
+	{ pattern: /\\omega/g, replace: 'ω' },
+	{ pattern: /\\Omega/g, replace: 'Ω' },
+	{ pattern: /\\rightarrow/g, replace: '→' },
+	{ pattern: /\\Rightarrow/g, replace: '⇒' },
+	{ pattern: /\\leftarrow/g, replace: '←' },
+	{ pattern: /\\Leftarrow/g, replace: '⇐' },
+	{ pattern: /\\leftrightarrow/g, replace: '↔' },
+	{ pattern: /\\Leftrightarrow/g, replace: '⇔' },
+	{ pattern: /\\to/g, replace: '→' },
+	{ pattern: /\\in/g, replace: '∈' },
+	{ pattern: /\\notin/g, replace: '∉' },
+	{ pattern: /\\subset/g, replace: '⊂' },
+	{ pattern: /\\subseteq/g, replace: '⊆' },
+	{ pattern: /\\supset/g, replace: '⊃' },
+	{ pattern: /\\supseteq/g, replace: '⊇' },
+	{ pattern: /\\cup/g, replace: '∪' },
+	{ pattern: /\\cap/g, replace: '∩' },
+	{ pattern: /\\emptyset/g, replace: '∅' },
+	{ pattern: /\\forall/g, replace: '∀' },
+	{ pattern: /\\exists/g, replace: '∃' },
+	{ pattern: /\\nexists/g, replace: '∄' },
+	{ pattern: /\\neg/g, replace: '¬' },
+	{ pattern: /\\land/g, replace: '∧' },
+	{ pattern: /\\lor/g, replace: '∨' },
+	{ pattern: /\\angle/g, replace: '∠' },
+	{ pattern: /\\perp/g, replace: '⊥' },
+	{ pattern: /\\parallel/g, replace: '∥' },
+	{ pattern: /\\circ/g, replace: '∘' },
+	{ pattern: /\\degree/g, replace: '°' },
+	{ pattern: /\\div/g, replace: '÷' },
+	{ pattern: /\\therefore/g, replace: '∴' },
+	{ pattern: /\\because/g, replace: '∵' }
 ];
 
 const normalizeEquationText = (value: string): string => {
@@ -137,7 +214,88 @@ const latexCommandMap: Record<string, string> = {
 	ln: 'ln',
 	log: 'log',
 	cdot: '⋅',
-	times: '×'
+	times: '×',
+	alpha: 'α',
+	beta: 'β',
+	gamma: 'γ',
+	Gamma: 'Γ',
+	delta: 'δ',
+	Delta: 'Δ',
+	epsilon: 'ε',
+	varepsilon: 'ε',
+	zeta: 'ζ',
+	eta: 'η',
+	theta: 'θ',
+	Theta: 'Θ',
+	vartheta: 'θ',
+	iota: 'ι',
+	kappa: 'κ',
+	lambda: 'λ',
+	Lambda: 'Λ',
+	mu: 'μ',
+	nu: 'ν',
+	xi: 'ξ',
+	Xi: 'Ξ',
+	pi: 'π',
+	Pi: 'Π',
+	rho: 'ρ',
+	sigma: 'σ',
+	Sigma: 'Σ',
+	tau: 'τ',
+	upsilon: 'υ',
+	Upsilon: 'Υ',
+	phi: 'φ',
+	Phi: 'Φ',
+	varphi: 'φ',
+	chi: 'χ',
+	psi: 'ψ',
+	Psi: 'Ψ',
+	omega: 'ω',
+	Omega: 'Ω',
+	sum: '∑',
+	prod: '∏',
+	int: '∫',
+	oint: '∮',
+	partial: '∂',
+	nabla: '∇',
+	infty: '∞',
+	pm: '±',
+	mp: '∓',
+	leq: '≤',
+	geq: '≥',
+	neq: '≠',
+	approx: '≈',
+	equiv: '≡',
+	rightarrow: '→',
+	Rightarrow: '⇒',
+	leftarrow: '←',
+	Leftarrow: '⇐',
+	leftrightarrow: '↔',
+	Leftrightarrow: '⇔',
+	to: '→',
+	in: '∈',
+	notin: '∉',
+	subset: '⊂',
+	subseteq: '⊆',
+	supset: '⊃',
+	supseteq: '⊇',
+	cup: '∪',
+	cap: '∩',
+	emptyset: '∅',
+	forall: '∀',
+	exists: '∃',
+	nexists: '∄',
+	neg: '¬',
+	land: '∧',
+	lor: '∨',
+	angle: '∠',
+	perp: '⊥',
+	parallel: '∥',
+	circ: '∘',
+	degree: '°',
+	div: '÷',
+	therefore: '∴',
+	because: '∵'
 };
 
 const operatorCommands = new Set(['cdot', 'times']);
@@ -403,16 +561,26 @@ const findNextMarker = (text: string): { start: number; end: number; marker: str
 	return earliest;
 };
 
-const findInlineEquation = (text: string): { start: number; end: number } | null => {
-	const start = text.indexOf('$$');
-	if (start === -1) {
-		return null;
+const findInlineEquation = (text: string): { start: number; end: number; delimiter: string } | null => {
+	// Check for $$ delimiter first (higher priority)
+	const doubleStart = text.indexOf('$$');
+	if (doubleStart !== -1) {
+		const doubleEnd = text.indexOf('$$', doubleStart + 2);
+		if (doubleEnd !== -1) {
+			return { start: doubleStart, end: doubleEnd, delimiter: '$$' };
+		}
 	}
-	const end = text.indexOf('$$', start + 2);
-	if (end === -1) {
-		return null;
+
+	// Check for single $ delimiter
+	const singleStart = text.indexOf('$');
+	if (singleStart !== -1) {
+		const singleEnd = text.indexOf('$', singleStart + 1);
+		if (singleEnd !== -1) {
+			return { start: singleStart, end: singleEnd, delimiter: '$' };
+		}
 	}
-	return { start, end };
+
+	return null;
 };
 
 const parseInlineSegments = (text: string, baseStyle: InlineStyle = {}): InlineSegment[] => {
@@ -425,13 +593,13 @@ const parseInlineSegments = (text: string, baseStyle: InlineStyle = {}): InlineS
 
 	if (equationMatch && (!markerMatch || equationMatch.start < markerMatch.start)) {
 		const segments: InlineSegment[] = [];
-		const { start, end } = equationMatch;
+		const { start, end, delimiter } = equationMatch;
 
 		if (start > 0) {
 			segments.push(...parseInlineSegments(text.slice(0, start), baseStyle));
 		}
 
-		const equationText = text.slice(start + 2, end).trim();
+		const equationText = text.slice(start + delimiter.length, end).trim();
 		if (equationText) {
 			segments.push({
 				text: equationText,
@@ -440,7 +608,7 @@ const parseInlineSegments = (text: string, baseStyle: InlineStyle = {}): InlineS
 			});
 		}
 
-		const remaining = text.slice(end + 2);
+		const remaining = text.slice(end + delimiter.length);
 		if (remaining) {
 			segments.push(...parseInlineSegments(remaining, baseStyle));
 		}
