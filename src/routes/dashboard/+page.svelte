@@ -154,7 +154,14 @@
 		removeFile(target);
 	}
 
-	const handleCreateSubmit: SubmitFunction = () => {
+	const handleCreateSubmit: SubmitFunction = ({ formData, cancel }) => {
+		if (files.length === 0 || submissionState === 'creating') {
+			cancel();
+			return;
+		}
+
+		files.forEach((file) => formData.append('files', file));
+
 		submissionState = 'creating';
 
 		return async ({ result }) => {
@@ -166,7 +173,7 @@
 				toast.success('Lesson created successfully');
 			} else {
 				submissionState = 'idle';
-				toast.error('Failed to create lesson.');
+				toast.error(result.type === 'error' && result.error?.message ? result.error.message : 'Failed to create lesson.');
 			}
 		};
 	};
@@ -176,6 +183,10 @@
 		lessonLink = '';
 	}
 </script>
+
+<svelte:head>
+	<title>Dashboard • AI Classroom</title>
+</svelte:head>
 
 <main class="min-h-screen bg-slate-950 text-slate-100">
 	<DashboardNavbar
@@ -299,8 +310,13 @@
 		</div>
 
 		{#if submissionState !== 'complete'}
-			<form method="post" action="?/create" class="mt-6" use:enhance={handleCreateSubmit}>
-				<input type="hidden" name="payload" value={files.length ? 'demo' : ''} />
+			<form
+				method="post"
+				action="?/create"
+				class="mt-6"
+				enctype="multipart/form-data"
+				use:enhance={handleCreateSubmit}
+			>
 				<Button
 					type="submit"
 					size="lg"

@@ -9,6 +9,11 @@ export function generateUserId() {
 	return encodeBase32LowerCase(bytes);
 }
 
+export function generateLessonId() {
+	const bytes = crypto.getRandomValues(new Uint8Array(15));
+	return encodeBase32LowerCase(bytes);
+}
+
 export function validateUsername(username: unknown): username is string {
 	return (
 		typeof username === 'string' &&

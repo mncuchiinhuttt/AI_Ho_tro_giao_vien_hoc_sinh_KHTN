@@ -40,7 +40,11 @@ export const lesson = pgTable('lesson', {
 	title: text('title').notNull(),
 	lessonContent: text('lesson_content').notNull(),
 	studyContent: text('study_content').notNull(),
-	vocabulary: jsonb('vocabulary').$type<LessonVocabularyEntry[]>().notNull().default(sql`'[]'::jsonb`)
+	vocabulary: jsonb('vocabulary').$type<LessonVocabularyEntry[]>().notNull().default(sql`'[]'::jsonb`),
+	creatorId: text('creator_id')
+		.notNull()
+		.references(() => user.id),
+	createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
 });
 
 export type Session = typeof session.$inferSelect;
