@@ -16,21 +16,30 @@
 	} = $props();
 </script>
 
-<nav class="flex items-center justify-between border-b border-white/10 bg-slate-950/80 px-6 py-4 text-slate-100 shadow-sm backdrop-blur">
-	<div class="text-lg font-semibold tracking-tight text-white">{appName}</div>
-		<div class="flex items-center gap-5">
+<nav class="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4 shadow-sm backdrop-blur-sm">
+	<div class="flex items-center gap-3">
+		<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-teal-400 to-cyan-400 shadow-md">
+			<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-white">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" />
+			</svg>
+		</div>
+		<span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-teal-500 to-cyan-500">
+			{appName}
+		</span>
+	</div>
+		<div class="flex items-center gap-4">
 			{#if user}
-				<div class="text-right text-sm leading-tight">
-					<p class="font-medium text-slate-100">{user.username}</p>
-					<p class="text-xs text-slate-400">ID: {user.id}</p>
+				<div class="hidden sm:block text-right text-sm leading-tight bg-gradient-to-br from-teal-50 to-cyan-50 px-4 py-2 rounded-xl border border-teal-100">
+					<p class="font-bold text-gray-900">{user.username}</p>
+					<p class="text-xs text-gray-600">ID: {user.id}</p>
 				</div>
 				<form method="post" action="?/logout" use:enhance>
-					<Button type="submit" size="sm" variant="destructive">
+					<Button type="submit" size="sm" class="bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-600 hover:to-cyan-600 shadow-md font-semibold">
 						Sign out
 					</Button>
 				</form>
 			{:else}
-				<Button href="/" size="sm" variant="outline" class="text-slate-100">
+				<Button href="/" size="sm" class="bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-600 hover:to-cyan-600 shadow-md font-semibold">
 					Login
 				</Button>
 			{/if}

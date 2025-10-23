@@ -4,6 +4,7 @@
 	import { Field, FieldContent, FieldError, FieldLabel } from '$lib/components/ui/field';
 	import { Input } from '$lib/components/ui/input';
 	import type { AuthFormState } from '$lib/types/auth';
+	import { toast } from 'svelte-sonner';
 
 	export let form: AuthFormState = null;
 
@@ -37,16 +38,18 @@
 					await goto(redirectLocation);
 					return;
 				}
-                
+
 				await goto('/dashboard');
+				
+				toast.success('Login successful!');
 				return;
 			}
 
 			const data = await response.json().catch(() => null);
-			errorMessage = data?.message ?? 'Incorrect username or password.';
+			toast.error(data?.message ?? 'Incorrect username or password.');
 		} catch (error) {
 			console.error('login request failed', error);
-			errorMessage = 'Something went wrong. Please try again.';
+			toast.error('Something went wrong. Please try again.');
 		} finally {
 			isSubmitting = false;
 		}
@@ -85,7 +88,7 @@
 	<Button
 		type="button"
 		onclick={handleLogin}
-		class="w-full"
+		class="w-full bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-600 hover:to-cyan-600"
 		disabled={isSubmitting}
 		aria-busy={isSubmitting}
 	>

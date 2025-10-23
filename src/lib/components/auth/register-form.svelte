@@ -10,6 +10,7 @@
 	} from '$lib/components/ui/field';
 	import { Input } from '$lib/components/ui/input';
 	import type { AuthFormState } from '$lib/types/auth';
+	import { toast } from 'svelte-sonner';
 
 	let { form = null }: { form: AuthFormState } = $props();
 
@@ -44,15 +45,16 @@
 					await goto(redirectLocation);
 					return;
 				}
+				toast.success('Registration successful!');
 				await goto('/dashboard');
 				return;
 			}
 
 			const data = await response.json().catch(() => null);
-			errorMessage = data?.message ?? 'Unable to create account. Please review your details.';
+			toast.error(data?.message ?? 'Unable to create account. Please review your details.');
 		} catch (error) {
 			console.error('register request failed', error);
-			errorMessage = 'Something went wrong. Please try again.';
+			toast.error('Something went wrong. Please try again.');
 		} finally {
 			isSubmitting = false;
 		}
@@ -107,7 +109,7 @@
 	<Button
 		type="button"
 		onclick={handleRegister}
-		class="w-full"
+		class="w-full bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-600 hover:to-cyan-600"
 		disabled={isSubmitting}
 		aria-busy={isSubmitting}
 	>
