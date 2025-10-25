@@ -771,6 +771,18 @@ const createTableCellParagraph = (content: string, fontFamily: string, size: num
 		spacing: { after: 120, line: 280 }
 	});
 
+const createTableCellParagraphs = (content: string, fontFamily: string, size: number): Paragraph[] => {
+	// Split content by <br> or <br/> tags to create multiple paragraphs
+	const lines = content.split(/<br\s*\/?>/i);
+	
+	return lines.map(line => 
+		new Paragraph({
+			children: segmentsToRuns(parseInlineSegments(line.trim()), fontFamily, size),
+			spacing: { after: 120, line: 280 }
+		})
+	);
+};
+
 const createAlphaListParagraph = (
 	line: string,
 	fontFamily: string,
@@ -910,7 +922,7 @@ const createTable = (lines: string[], fontFamily: string, size: number): Table =
 				tableHeader: rowIndex === 0,
 				children: cells.map((cell) =>
 					new TableCell({
-						children: [createTableCellParagraph(cell, fontFamily, size)],
+						children: createTableCellParagraphs(cell, fontFamily, size),
 						margins: {
 							top: TABLE_CELL_MARGIN,
 							bottom: TABLE_CELL_MARGIN,
@@ -973,9 +985,67 @@ export const markdownToDocxBlob = async (
 	const fontFamily = options.fontFamily ?? options.font ?? DEFAULT_FONT_FAMILY;
 	const normalSize = options.normalSize ?? DEFAULT_NORMAL_SIZE;
 	const headingSizes = { ...DEFAULT_HEADING_SIZES, ...options.headingSizes } as Record<number, number>;
-	const lines = markdown.split(/\r?\n/);
+	
+	console.log('[markdownToDocxBlob] Raw markdown first 200 chars:', markdown.substring(0, 200));
+	console.log('[markdownToDocxBlob] Contains literal \\n:', markdown.includes('\\n'));
+	console.log('[markdownToDocxBlob] Contains actual newline:', markdown.includes('\n'));
+	
+	// Fix corrupted LaTeX commands where backslashes were interpreted as escape sequences
+	// This happens when markdown with LaTeX is stored/transmitted and escape sequences get processed
+	let processedMarkdown = markdown
+		// Fix escape sequences that became actual characters
+		.replace(/\t(?=ext\{)/g, '\\t')           // Tab before ext{ → \text{
+		.replace(/\f(?=rac\{)/g, '\\f')           // Form feed before rac{ → \frac{
+		.replace(/\t(?=imes)/g, '\\t')            // Tab before imes → \times
+		.replace(/\t(?=heta)/g, '\\t')            // Tab before heta → \theta
+		// Now fix the partial commands to full LaTeX commands
+		.replace(/\\text\{/g, '\\text{')
+		.replace(/\\frac\{/g, '\\frac{')
+		.replace(/\\times/g, '\\times')
+		.replace(/\\theta/g, '\\theta')
+		.replace(/\\sqrt\{/g, '\\sqrt{')
+		.replace(/\\cdot/g, '\\cdot')
+		.replace(/\\ldots/g, '\\ldots')
+		.replace(/\\dots/g, '\\dots')
+		.replace(/\\cdots/g, '\\cdots')
+		.replace(/\\alpha/g, '\\alpha')
+		.replace(/\\beta/g, '\\beta')
+		.replace(/\\gamma/g, '\\gamma')
+		.replace(/\\Delta/g, '\\Delta')
+		.replace(/\\delta/g, '\\delta')
+		.replace(/\\pi/g, '\\pi')
+		.replace(/\\sum/g, '\\sum')
+		.replace(/\\int/g, '\\int')
+		.replace(/\\infty/g, '\\infty')
+		.replace(/\\neq/g, '\\neq')
+		.replace(/\\leq/g, '\\leq')
+		.replace(/\\geq/g, '\\geq')
+		.replace(/\\approx/g, '\\approx')
+		.replace(/\\equiv/g, '\\equiv');
+	
+	console.log('[markdownToDocxBlob] After LaTeX fix, first 200 chars:', processedMarkdown.substring(0, 200));
+	
+	// Unescape literal \n and \r characters to actual newlines
+	// This handles cases where the markdown has escaped newlines like "line1\\nline2"
+	
+	// Try to detect if we have literal backslash-n combinations
+	if (processedMarkdown.includes('\\n') && !processedMarkdown.includes('\n')) {
+		// Replace escaped newlines with actual newlines
+		processedMarkdown = processedMarkdown
+			.replace(/\\r\\n/g, '\n')
+			.replace(/\\n/g, '\n')
+			.replace(/\\r/g, '\r');
+		console.log('[markdownToDocxBlob] Unescaped literal newlines');
+	}
+	
+	const lines = processedMarkdown.split(/\r?\n/);
 	const children: Array<Paragraph | Table> = [];
 	let hasContent = false;
+
+	console.log('[markdownToDocxBlob] Starting conversion');
+	console.log('[markdownToDocxBlob] Total lines:', lines.length);
+	console.log('[markdownToDocxBlob] First 5 lines:', lines.slice(0, 5));
+	console.log('[markdownToDocxBlob] Last 5 lines:', lines.slice(-5));
 
 	for (let i = 0; i < lines.length; i += 1) {
 		const line = lines[i];
@@ -1105,6 +1175,9 @@ export const markdownToDocxBlob = async (
 	if (!children.length) {
 		children.push(createParagraph('', { fontFamily, size: normalSize }));
 	}
+
+	console.log('[markdownToDocxBlob] Total children created:', children.length);
+	console.log('[markdownToDocxBlob] Children types:', children.map(c => c.constructor.name));
 
 	const document = new Document({
 		styles: {

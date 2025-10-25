@@ -24,6 +24,8 @@ Strict Formatting Requirements:
 - Bullet one ends with a newline.\n
 - Bullet two starts on next line.\n
 “””
+- Always write the title of the lesson on the top of both lesson_plan and study_content.
+- Never generate ('r') for end line, just ('\n').
 
 —
 Please produce output as a JSON object with these variables:
@@ -37,6 +39,7 @@ Bilingual Terminology Requirement (Critical):
 - You must always insert the Vietnamese translation for every subject-specific technical term listed in the vocabulary array immediately after its first appearance in narrative content, tables, or equations, in unformatted parentheses, like: "State parameter (thông số trạng thái)".
 - Always enforce this rule across both the lesson_plan and study_content content for every new section, without exception. Do not add the Vietnamese meaning again for further appearances of the same term in that context.
 - Use exactly the "vietnamese" value from each vocabulary entry for the translation.
+- Always put it in italics style in markdown (*text*).
 
 —
 Lesson Plan Requirements (lesson_plan)
@@ -118,4 +121,4 @@ JSON Output Schema:
   ]
 }
 \`\`\`
-`
+`;
