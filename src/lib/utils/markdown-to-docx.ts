@@ -88,6 +88,10 @@ const latexReplacements: Array<{
 	replace: string | ((...args: string[]) => string);
 }> = [
 	{
+		pattern: /\\text\s*\{([^}]*)\}/g,
+		replace: (_, text) => text
+	},
+	{
 		pattern: /\\frac\s*\{([^}]*)\}\s*\{([^}]*)\}/g,
 		replace: (_, numerator, denominator) => `${numerator}/${denominator}`
 	},
@@ -196,7 +200,10 @@ const latexReplacements: Array<{
 	{ pattern: /\\degree/g, replace: '°' },
 	{ pattern: /\\div/g, replace: '÷' },
 	{ pattern: /\\therefore/g, replace: '∴' },
-	{ pattern: /\\because/g, replace: '∵' }
+	{ pattern: /\\because/g, replace: '∵' },
+	{ pattern: /\\ldots/g, replace: '…' },
+	{ pattern: /\\dots/g, replace: '…' },
+	{ pattern: /\\cdots/g, replace: '⋯' }
 ];
 
 const normalizeEquationText = (value: string): string => {
@@ -295,7 +302,10 @@ const latexCommandMap: Record<string, string> = {
 	degree: '°',
 	div: '÷',
 	therefore: '∴',
-	because: '∵'
+	because: '∵',
+	ldots: '…',
+	dots: '…',
+	cdots: '⋯'
 };
 
 const operatorCommands = new Set(['cdot', 'times']);
@@ -318,6 +328,35 @@ const readCommand = (input: string, start: number): { command: string; nextIndex
 	return { command: input.slice(start, index), nextIndex: index };
 };
 
+const extractTextCommand = (input: string, start: number): { content: string; nextIndex: number } | null => {
+	// Check if this is a \text command
+	if (!input.startsWith('\\text', start)) {
+		return null;
+	}
+	
+	let index = start + 5; // Skip '\text'
+	index = consumeWhitespace(input, index);
+	
+	if (index >= input.length || input[index] !== '{') {
+		return null;
+	}
+	
+	// Extract the content inside braces
+	let depth = 1;
+	let cursor = index + 1;
+	while (cursor < input.length && depth > 0) {
+		const char = input[cursor];
+		if (char === '{') {
+			depth += 1;
+		} else if (char === '}') {
+			depth -= 1;
+		}
+		cursor += 1;
+	}
+	
+	return { content: input.slice(index + 1, cursor - 1), nextIndex: cursor };
+};
+
 const extractGroupContent = (input: string, start: number): { content: string; nextIndex: number } => {
 	let index = consumeWhitespace(input, start);
 	if (index >= input.length) {
@@ -327,16 +366,37 @@ const extractGroupContent = (input: string, start: number): { content: string; n
 	if (input[index] === '{') {
 		let depth = 1;
 		let cursor = index + 1;
+		let content = '';
+		
 		while (cursor < input.length && depth > 0) {
+			// Check for \text command inside braces
+			if (input.startsWith('\\text{', cursor)) {
+				const textMatch = extractTextCommand(input, cursor);
+				if (textMatch) {
+					content += textMatch.content;
+					cursor = textMatch.nextIndex;
+					// The textMatch already consumed the \text{...} including braces
+					// Don't increment depth counters since they were handled
+					continue;
+				}
+			}
+			
 			const char = input[cursor];
+			
 			if (char === '{') {
 				depth += 1;
+				content += char;
 			} else if (char === '}') {
 				depth -= 1;
+				if (depth > 0) {
+					content += char;
+				}
+			} else {
+				content += char;
 			}
 			cursor += 1;
 		}
-		return { content: input.slice(index + 1, cursor - 1), nextIndex: cursor };
+		return { content, nextIndex: cursor };
 	}
 
 	if (input[index] === '\\') {
@@ -427,6 +487,9 @@ const parseEquationSpecs = (value: string): EquationRunSpec[] => {
 			index += 1;
 			const scriptContent = extractGroupContent(value, index);
 			index = scriptContent.nextIndex;
+			
+			// Process the content - it may already have \text{} resolved by extractGroupContent
+			// Parse the content to create specs
 			const scriptSpecs = parseEquationSpecs(scriptContent.content).map((spec) => ({
 				...spec,
 				superScript: isSuper ? true : spec.superScript,
@@ -444,6 +507,14 @@ const parseEquationSpecs = (value: string): EquationRunSpec[] => {
 		}
 
 		if (char === '\\') {
+			// Check for \text command first
+			const textCmd = extractTextCommand(value, index);
+			if (textCmd) {
+				index = textCmd.nextIndex;
+				appendSpecs([{ text: textCmd.content }], true);
+				continue;
+			}
+			
 			const { command, nextIndex } = readCommand(value, index + 1);
 			index = nextIndex;
 			const mapped = latexCommandMap[command] ?? command;
@@ -562,24 +633,38 @@ const findNextMarker = (text: string): { start: number; end: number; marker: str
 };
 
 const findInlineEquation = (text: string): { start: number; end: number; delimiter: string } | null => {
-	// Check for $$ delimiter first (higher priority)
-	const doubleStart = text.indexOf('$$');
-	if (doubleStart !== -1) {
-		const doubleEnd = text.indexOf('$$', doubleStart + 2);
-		if (doubleEnd !== -1) {
-			return { start: doubleStart, end: doubleEnd, delimiter: '$$' };
+	let pos = 0;
+	
+	// Find the earliest equation delimiter
+	while (pos < text.length) {
+		const dollarPos = text.indexOf('$', pos);
+		if (dollarPos === -1) {
+			return null;
+		}
+		
+		// Check if it's a $$ delimiter
+		if (text[dollarPos + 1] === '$') {
+			// Find the matching closing $$
+			const closingPos = text.indexOf('$$', dollarPos + 2);
+			if (closingPos !== -1) {
+				return { start: dollarPos, end: closingPos, delimiter: '$$' };
+			}
+			// If no closing $$, skip these two $ and continue
+			pos = dollarPos + 2;
+		} else {
+			// Single $ delimiter
+			const closingPos = text.indexOf('$', dollarPos + 1);
+			if (closingPos !== -1) {
+				// Make sure the closing $ is not part of $$
+				if (text[closingPos - 1] !== '$' && text[closingPos + 1] !== '$') {
+					return { start: dollarPos, end: closingPos, delimiter: '$' };
+				}
+			}
+			// Skip this $ and continue
+			pos = dollarPos + 1;
 		}
 	}
-
-	// Check for single $ delimiter
-	const singleStart = text.indexOf('$');
-	if (singleStart !== -1) {
-		const singleEnd = text.indexOf('$', singleStart + 1);
-		if (singleEnd !== -1) {
-			return { start: singleStart, end: singleEnd, delimiter: '$' };
-		}
-	}
-
+	
 	return null;
 };
 
@@ -677,7 +762,7 @@ const createParagraph = (content: string, context: ParagraphContext): Paragraph 
 		children: segmentsToRuns(parseInlineSegments(content), context.fontFamily, context.size),
 		heading: context.headingLevel,
 		spacing: { after: 200 },
-		alignment: context.align ?? (context.isFirstBlock ? AlignmentType.CENTER : undefined)
+		alignment: context.align
 	});
 
 const createTableCellParagraph = (content: string, fontFamily: string, size: number): Paragraph =>
@@ -850,14 +935,7 @@ const createEquationParagraph = (equation: string, context: ParagraphContext): P
 	new Paragraph({
 		alignment: AlignmentType.CENTER,
 		spacing: { before: 200, after: 200 },
-		children: [
-			new TextRun({
-				text: normalizeEquationText(equation),
-				font: context.fontFamily,
-				size: context.size,
-				sizeComplexScript: context.size
-			})
-		]
+		children: buildEquationRuns(equation, context.fontFamily, context.size, { italics: true })
 	});
 
 const collectParagraphLines = (lines: string[], startIndex: number): { text: string; nextIndex: number } => {
@@ -921,6 +999,25 @@ export const markdownToDocxBlob = async (
 		}
 
 		if (trimmed.startsWith('$$')) {
+			// Check if this line has multiple equation blocks (e.g., "$$eq1$$ or $$eq2$$")
+			// Count the number of $$ pairs
+			const dollarCount = (trimmed.match(/\$\$/g) || []).length;
+			
+			// If there are more than 2 $$, treat as inline equations (regular paragraph)
+			if (dollarCount > 2) {
+				// This is a paragraph with multiple inline equations
+				children.push(
+					createParagraph(trimmed, {
+						fontFamily,
+						size: normalSize,
+						isFirstBlock: !hasContent
+					})
+				);
+				hasContent = true;
+				continue;
+			}
+			
+			// Regular block equation handling
 			let equationContent = '';
 			if (trimmed === '$$') {
 				while (i + 1 < lines.length) {
