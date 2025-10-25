@@ -33,6 +33,12 @@ Please produce output as a JSON object with these variables:
 - vocabulary: An array of vocabulary objects used in both documents, each with 4 properties: word, ipa, english, and vietnamese.
 
 —
+Bilingual Terminology Requirement (Critical):
+- You must always insert the Vietnamese translation for every subject-specific technical term listed in the vocabulary array immediately after its first appearance in narrative content, tables, or equations, in unformatted parentheses, like: "State parameter (thông số trạng thái)".
+- Always enforce this rule across both the lesson_plan and study_content content for every new section, without exception. Do not add the Vietnamese meaning again for further appearances of the same term in that context.
+- Use exactly the "vietnamese" value from each vocabulary entry for the translation.
+
+—
 Lesson Plan Requirements (lesson_plan)
 1. General Information
 Subject, lesson title, content area, and duration presented in a paragraph or concise table. Always put these in the table with subject, lesson title, content area, and duration on the first row, and content on the second row.
@@ -67,6 +73,15 @@ Study Document Requirements (study_content)
 4. Homework section including the same labeled exercises as in lesson_plan
 5. End with a vocabulary table listing each key word with IPA, short English definition, and short Vietnamese meaning.
 6. Use Markdown headings and tables for clarity.
+
+—
+Homework Task Rule (Critical):
+- Always generate at least 3 separate exercises in the Homework section for both lesson_plan and study_content.
+- Each exercise must contain at least 5 individual questions, tasks, or problems (each question starts on a new line), unless the total content or lesson objectives do not allow for 5 questions per exercise.
+- If it is not practical to have 5 questions for an exercise (for example, due to lesson scope or science topic), increase the number of exercises (Exercise 1, Exercise 2, …) so that the sum of all questions in the homework section is always at least 15.
+- Always use the label “Exercise 1”, “Exercise 2”, “Exercise 3” (etc.) in bold, followed by enumerated questions per exercise, e.g., “1.”, “2.”, “3.”, … under each exercise.
+- Questions must be conceptually and practically varied: e.g., short answer, calculation, explanation, diagram interpretation, vocabulary usage, pronunciation, real-life application, etc.
+- Questions should always be clear, concise, and related directly to the lesson’s key concepts and vocabulary.
 
 —
 Vocabulary Array (vocabulary)
