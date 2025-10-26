@@ -26,6 +26,7 @@
 	let submissionState = $state<'idle' | 'creating' | 'complete'>('idle');
 	let lessonLink = $state('');
 	let selectedModel = $state<string>('');
+	let numberOfPeriods = $state<number>(1);
 
 	const formatFileSize = (size: number) => {
 		const units = ['B', 'KB', 'MB', 'GB'];
@@ -170,6 +171,7 @@
 
 		files.forEach((file) => formData.append('files', file));
 		formData.append('model', selectedModel);
+		formData.append('numberOfPeriods', numberOfPeriods.toString());
 
 		submissionState = 'creating';
 
@@ -190,6 +192,7 @@
 	function resetUploader() {
 		submissionState = 'idle';
 		lessonLink = '';
+		numberOfPeriods = 1;
 	}
 </script>
 
@@ -214,32 +217,60 @@
 		</div>
 
 		<div class="mb-8 rounded-2xl bg-gradient-to-br from-teal-50 to-cyan-50 p-6 shadow-lg border border-teal-100">
-			<div class="flex items-center gap-4">
-				<div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-teal-400 to-cyan-400 text-white shadow-md">
-					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
-					</svg>
+			<div class="grid gap-6 md:grid-cols-2">
+				<!-- AI Model Selection -->
+				<div class="flex items-center gap-4">
+					<div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-teal-400 to-cyan-400 text-white shadow-md flex-shrink-0">
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
+						</svg>
+					</div>
+					<div class="flex-1">
+						<label for="model-select" class="text-sm font-semibold text-gray-700 block mb-2">
+							Choose AI Model
+						</label>
+						<Select type="single" bind:value={selectedModel} disabled={submissionState === 'creating'}>
+							<SelectTrigger id="model-select" class="w-full bg-white border-gray-200 hover:bg-gray-50 focus:ring-2 focus:ring-teal-300">
+								{#if selectedModel === 'gemini-flash-latest'}
+									✨ Gemini Flash (Fast & Efficient)
+								{:else if selectedModel === 'gemini-2.5-pro'}
+									🚀 Gemini 2.5 Pro (Most Powerful)
+								{:else}
+									Select your AI model
+								{/if}
+							</SelectTrigger>
+							<SelectContent>
+								<SelectLabel>Available Models</SelectLabel>
+								<SelectItem value="gemini-flash-latest">✨ Gemini Flash - Fast & Efficient</SelectItem>
+								<SelectItem value="gemini-2.5-pro">🚀 Gemini 2.5 Pro - Most Powerful</SelectItem>
+							</SelectContent>
+						</Select>
+					</div>
 				</div>
-				<div class="flex-1">
-					<label for="model-select" class="text-sm font-semibold text-gray-700 block mb-2">
-						Choose AI Model
-					</label>
-					<Select type="single" bind:value={selectedModel} disabled={submissionState === 'creating'}>
-						<SelectTrigger id="model-select" class="w-full bg-white border-gray-200 hover:bg-gray-50 focus:ring-2 focus:ring-teal-300">
-							{#if selectedModel === 'gemini-flash-latest'}
-								✨ Gemini Flash (Fast & Efficient)
-							{:else if selectedModel === 'gemini-2.5-pro'}
-								🚀 Gemini 2.5 Pro (Most Powerful)
-							{:else}
-								Select your AI model
-							{/if}
-						</SelectTrigger>
-						<SelectContent>
-							<SelectLabel>Available Models</SelectLabel>
-							<SelectItem value="gemini-flash-latest">✨ Gemini Flash - Fast & Efficient</SelectItem>
-							<SelectItem value="gemini-2.5-pro">🚀 Gemini 2.5 Pro - Most Powerful</SelectItem>
-						</SelectContent>
-					</Select>
+
+				<!-- Number of Periods Input -->
+				<div class="flex items-center gap-4">
+					<div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-blue-400 text-white shadow-md flex-shrink-0">
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+						</svg>
+					</div>
+					<div class="flex-1">
+						<label for="periods-input" class="text-sm font-semibold text-gray-700 block mb-2">
+							Number of Periods
+						</label>
+						<input
+							id="periods-input"
+							type="number"
+							min="1"
+							max="10"
+							bind:value={numberOfPeriods}
+							disabled={submissionState === 'creating'}
+							class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-50 focus:ring-2 focus:ring-teal-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+							placeholder="e.g., 2"
+						/>
+						<p class="mt-1 text-xs text-gray-500">Each period = 45 minutes</p>
+					</div>
 				</div>
 			</div>
 		</div>

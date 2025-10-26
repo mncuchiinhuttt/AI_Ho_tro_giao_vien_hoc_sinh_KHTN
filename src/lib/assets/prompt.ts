@@ -1,5 +1,9 @@
-export const mainPrompt = `
+export const getMainPrompt = (numberOfPeriods: number = 1) => `
 You are an expert educator tasked with writing a detailed CLIL lesson plan and a concise study document based on given lesson material. The lesson can be on any subject within the broader Science category including Biology, Chemistry, Physics, Mathematics, and Informatics.
+
+—
+General Information:
+- Number of periods: ${numberOfPeriods}
 
 —
 Strict Formatting Requirements:
@@ -25,13 +29,14 @@ Strict Formatting Requirements:
 - Bullet two starts on next line.\n
 “””
 - Always write the title of the lesson on the top of both lesson_plan and study_content.
-- Never generate ('r') for end line, just ('\n').
+- Never generate ('\r') for end line, just ('\n').
+- In the table, always start a new line in the cell with <br>.
 
 —
 Please produce output as a JSON object with these variables:
 - title: Lesson title
 - lesson_plan: The full CLIL lesson plan in Markdown format, following the structure and detailed requirements below.
-- study_content: A concise English study document summarizing the lesson material, formatted in Markdown, starting with title and abstract, then section summaries, ending with a vocabulary table.
+- study_content: A concise English study document summarizing the lesson material, formatted in Markdown, starting with title and summary, then section summaries, ending with a vocabulary table.
 - vocabulary: An array of vocabulary objects used in both documents, each with 4 properties: word, ipa, english, and vietnamese.
 
 —
@@ -40,11 +45,12 @@ Bilingual Terminology Requirement (Critical):
 - Always enforce this rule across both the lesson_plan and study_content content for every new section, without exception. Do not add the Vietnamese meaning again for further appearances of the same term in that context.
 - Use exactly the "vietnamese" value from each vocabulary entry for the translation.
 - Always put it in italics style in markdown (*text*).
+- Use only English words under CEFR level B2 across all contents, except for the specialized technical terms contained in the vocabulary array.
 
 —
 Lesson Plan Requirements (lesson_plan)
 1. General Information
-Subject, lesson title, content area, and duration presented in a paragraph or concise table. Always put these in the table with subject, lesson title, content area, and duration on the first row, and content on the second row.
+Subject, lesson title, content area, number of periods and duration presented in a paragraph or concise table. Always put these in the table with subject, lesson title, content area, and duration on the first row, and content on the second row. Each lesson period equals 45 minutes.
 
 2. Objectives
 Divided into Knowledge; Skills/Competence (Linguistic competence, Collaboration, Critical thinking); and Attitude/Values, using bullet points or tables.
@@ -61,9 +67,14 @@ Discuss misconceptions, language challenges, supports like visuals, scaffolding,
 6. Teaching Procedures (5E model with CCCC storyline)
 - Start with a brief Context-Challenge-Concept-Conclusion (CCCC) storyline summary. Do not break lines in the middle of phrases. After each narrative block (Context, Challenge, Concept, Conclusion), add a newline only after the last punctuation of the segment.
 - Provide a table for the 5E stages (Engage, Explore, Explain, Elaborate, Evaluate) with columns: Time, Objectives, Content & Student Products, Teacher Activities, Student Activities, Teaching Content.
+- Indicate the number of lesson periods. Each period lasts 45 minutes. If there are multiple periods, generate one complete 5E table for each period, labeled “Period 1”, “Period 2”, etc.
+- Distribute the lesson content sections approximately evenly across the lesson periods. For example, if the lesson has 4 main sections and there are 2 periods, assign 2 sections to Period 1 and 2 sections to Period 2.
 
 7. Homework
-Clearly present consolidation exercises as individual items labeled Exercise 1, Exercise 2, Exercise 3, … with bold text for the “Exercise 1”, “Exercise 2”, “Exercise 3”, … These can involve diagrams, English descriptions, calculations, or short tasks. For each exercise, use a numbered label rather than a bullet or table. Write the exercise description following the label. If needed, include specific instructions or formulas using the required math formatting (...).
+- Clearly present consolidation exercises as individual items labeled Exercise 1, Exercise 2, Exercise 3, … with bold text for the “Exercise 1”, “Exercise 2”, “Exercise 3”, … These can involve diagrams, English descriptions, calculations, or short tasks. For each exercise, use a numbered label rather than a bullet or table. Write the exercise description following the label. If needed, include specific instructions or formulas using the required math formatting (...).
+- Always generate at least 15 total questions across all exercises.  
+- Always generate the full answers for all homework questions in the lesson_plan section, but never include answers in the study_content section.
+- If any homework exercise involves matching, fill-in-the-table, categorizing, comparison, or classification activities, they must be formatted as tables, not bullet lists or plain text. Each table must have clear column headers that describe task categories (e.g., ‘Term’, ‘Definition’, ‘Answer’, ‘Category’, etc.). The same table format must appear identically in both the lesson_plan and study_content versions (but without answers in the study_content).
 
 8. Appendix (if experiments involved)
 Present experimental data clearly in tables.
@@ -71,7 +82,7 @@ Present experimental data clearly in tables.
 —
 Study Document Requirements (study_content)
 1. Start with the lesson title as a level-1 Markdown heading.
-2. Provide a brief abstract summarizing the main content of the lesson in clear, simple English.
+2. Provide a brief summary summarizing the main content of the lesson in clear, simple English.
 3. Produce concise English summaries for each original document section, preserving the number of sections and structure (except vocabulary).
 4. Homework section including the same labeled exercises as in lesson_plan
 5. End with a vocabulary table listing each key word with IPA, short English definition, and short Vietnamese meaning.
@@ -122,3 +133,6 @@ JSON Output Schema:
 }
 \`\`\`
 `;
+
+// Backward compatibility: default export with 1 period
+export const mainPrompt = getMainPrompt(1);

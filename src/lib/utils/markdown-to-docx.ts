@@ -82,6 +82,29 @@ const markerDefinitions: Array<{ marker: string; style: InlineStyle }> = [
 
 const breakPattern = /<br\s*\/?>(?![^<]*>)/gi;
 const alphaListPattern = /^[a-z]\.\s+/i;
+const numericListPattern = /^\d+\.\s+/;
+const bulletListPattern = /^[-*+]\s+/;
+
+// Helper function to extract content within balanced braces
+const extractBalancedBraces = (str: string, startPos: number): string | null => {
+	if (str[startPos] !== '{') return null;
+	
+	let depth = 0;
+	let i = startPos;
+	
+	while (i < str.length) {
+		if (str[i] === '{') depth++;
+		if (str[i] === '}') {
+			depth--;
+			if (depth === 0) {
+				return str.slice(startPos + 1, i);
+			}
+		}
+		i++;
+	}
+	
+	return null;
+};
 
 const latexReplacements: Array<{
 	pattern: RegExp;
@@ -118,8 +141,6 @@ const latexReplacements: Array<{
 	{ pattern: /\\tan\b/g, replace: 'tan' },
 	{ pattern: /\\ln\b/g, replace: 'ln' },
 	{ pattern: /\\log\b/g, replace: 'log' },
-	{ pattern: /\\sqrt\s*\{([^}]*)\}/g, replace: (_, value) => `√(${value})` },
-	{ pattern: /\\sqrt\[([^\]]+)\]\s*\{([^}]*)\}/g, replace: (_, root, value) => `${root}√(${value})` },
 	{ pattern: /\\leq/g, replace: '≤' },
 	{ pattern: /\\geq/g, replace: '≥' },
 	{ pattern: /\\neq/g, replace: '≠' },
@@ -206,11 +227,107 @@ const latexReplacements: Array<{
 	{ pattern: /\\cdots/g, replace: '⋯' }
 ];
 
+// Simple replacement: just convert \sqrt{...} to √(...) with balanced braces
+const processSqrtCommands = (text: string): string => {
+	let result = text;
+	let lastIndex = 0;
+	let output = '';
+	
+	// Handle \sqrt[n]{content}
+	const sqrtWithRootRegex = /\\sqrt\[([^\]]+)\]\s*\{/g;
+	let match;
+	
+	while ((match = sqrtWithRootRegex.exec(text)) !== null) {
+		const root = match[1];
+		const braceStart = match.index + match[0].length - 1; // Position of '{'
+		const content = extractBalancedBraces(text, braceStart);
+		
+		if (content !== null) {
+			output += text.slice(lastIndex, match.index);
+			output += `${root}√(${content})`;
+			lastIndex = braceStart + content.length + 2; // +2 for { and }
+			sqrtWithRootRegex.lastIndex = lastIndex;
+		}
+	}
+	output += text.slice(lastIndex);
+	result = output;
+	
+	// Handle \sqrt{content}
+	output = '';
+	lastIndex = 0;
+	const sqrtRegex = /\\sqrt\s*\{/g;
+	
+	while ((match = sqrtRegex.exec(result)) !== null) {
+		const braceStart = match.index + match[0].length - 1; // Position of '{'
+		const content = extractBalancedBraces(result, braceStart);
+		
+		if (content !== null) {
+			output += result.slice(lastIndex, match.index);
+			output += `√(${content})`;
+			lastIndex = braceStart + content.length + 2; // +2 for { and }
+			sqrtRegex.lastIndex = lastIndex;
+		}
+	}
+	output += result.slice(lastIndex);
+	
+	return output;
+};
+
+// Convert \vec{...} to vector notation with arrow
+const processVectorCommands = (text: string): string => {
+	let result = text;
+	let lastIndex = 0;
+	let output = '';
+	
+	// Handle \overrightarrow{content}
+	const overrightarrowRegex = /\\overrightarrow\s*\{/g;
+	let match;
+	
+	while ((match = overrightarrowRegex.exec(text)) !== null) {
+		const braceStart = match.index + match[0].length - 1; // Position of '{'
+		const content = extractBalancedBraces(text, braceStart);
+		
+		if (content !== null) {
+			output += text.slice(lastIndex, match.index);
+			output += `${content}⃗`; // Combining right arrow above (U+20D7)
+			lastIndex = braceStart + content.length + 2;
+			overrightarrowRegex.lastIndex = lastIndex;
+		}
+	}
+	output += text.slice(lastIndex);
+	result = output;
+	
+	// Handle \vec{content}
+	output = '';
+	lastIndex = 0;
+	const vecRegex = /\\vec\s*\{/g;
+	
+	while ((match = vecRegex.exec(result)) !== null) {
+		const braceStart = match.index + match[0].length - 1; // Position of '{'
+		const content = extractBalancedBraces(result, braceStart);
+		
+		if (content !== null) {
+			output += result.slice(lastIndex, match.index);
+			output += `${content}⃗`; // Combining right arrow above (U+20D7)
+			lastIndex = braceStart + content.length + 2;
+			vecRegex.lastIndex = lastIndex;
+		}
+	}
+	output += result.slice(lastIndex);
+	
+	return output;
+};
+
 const normalizeEquationText = (value: string): string => {
-	let formatted = value;
+	// First process special commands that need balanced brace handling
+	let formatted = processSqrtCommands(value);
+	formatted = processVectorCommands(formatted);
+	
+	// Then apply all other replacements (this will handle content inside sqrt/vectors)
 	for (const replacement of latexReplacements) {
 		formatted = formatted.replace(replacement.pattern, replacement.replace as never);
 	}
+	
 	return formatted.replace(/\\([a-zA-Z]+)/g, '$1');
 };
 
@@ -817,6 +934,74 @@ const createAlphaListParagraph = (
 	});
 };
 
+const createNumericListParagraph = (
+	line: string,
+	fontFamily: string,
+	size: number,
+	isFirstBlock: boolean
+): Paragraph => {
+	const match = line.match(/^(\d+)\.\s*(.*)$/);
+	const marker = match?.[1] ? `${match[1]}.` : '';
+	const body = match?.[2] ?? '';
+
+	const runs: TextRun[] = [];
+	if (marker) {
+		runs.push(
+			new TextRun({
+				text: `${marker} `,
+				font: fontFamily,
+				size,
+				sizeComplexScript: size,
+				bold: true
+			})
+		);
+	}
+
+	const bodySegments = segmentsToRuns(parseInlineSegments(body), fontFamily, size);
+	runs.push(...bodySegments);
+
+	return new Paragraph({
+		children: runs,
+		spacing: { after: 200 },
+		indent: { left: 720, hanging: 360 },
+		alignment: isFirstBlock ? AlignmentType.CENTER : undefined
+	});
+};
+
+const createBulletListParagraph = (
+	line: string,
+	fontFamily: string,
+	size: number,
+	isFirstBlock: boolean
+): Paragraph => {
+	const match = line.match(/^([-*+])\s*(.*)$/);
+	const marker = match?.[1] ? '•' : ''; // Use bullet character
+	const body = match?.[2] ?? '';
+
+	const runs: TextRun[] = [];
+	if (marker) {
+		runs.push(
+			new TextRun({
+				text: `${marker} `,
+				font: fontFamily,
+				size,
+				sizeComplexScript: size,
+				bold: true
+			})
+		);
+	}
+
+	const bodySegments = segmentsToRuns(parseInlineSegments(body), fontFamily, size);
+	runs.push(...bodySegments);
+
+	return new Paragraph({
+		children: runs,
+		spacing: { after: 200 },
+		indent: { left: 720, hanging: 360 },
+		alignment: isFirstBlock ? AlignmentType.CENTER : undefined
+	});
+};
+
 const splitTableCells = (line: string): string[] => {
 	const cells: string[] = [];
 	let currentCell = '';
@@ -969,6 +1154,12 @@ const collectParagraphLines = (lines: string[], startIndex: number): { text: str
 			break;
 		}
 		if (index > startIndex && alphaListPattern.test(current.trim())) {
+			break;
+		}
+		if (index > startIndex && numericListPattern.test(current.trim())) {
+			break;
+		}
+		if (index > startIndex && bulletListPattern.test(current.trim())) {
 			break;
 		}
 		buffer.push(current.trim());
@@ -1152,6 +1343,18 @@ export const markdownToDocxBlob = async (
 
 		if (alphaListPattern.test(trimmed)) {
 			children.push(createAlphaListParagraph(trimmed, fontFamily, normalSize, !hasContent));
+			hasContent = true;
+			continue;
+		}
+
+		if (numericListPattern.test(trimmed)) {
+			children.push(createNumericListParagraph(trimmed, fontFamily, normalSize, !hasContent));
+			hasContent = true;
+			continue;
+		}
+
+		if (bulletListPattern.test(trimmed)) {
+			children.push(createBulletListParagraph(trimmed, fontFamily, normalSize, !hasContent));
 			hasContent = true;
 			continue;
 		}

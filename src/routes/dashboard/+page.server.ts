@@ -6,7 +6,7 @@ import * as table from '$lib/server/db/schema';
 import { generateLessonId } from '$lib/server/auth/utils';
 import { Buffer } from 'node:buffer';
 import { GoogleGenAI, Type } from "@google/genai";
-import { mainPrompt } from '$lib/assets/prompt';
+import { getMainPrompt } from '$lib/assets/prompt';
 import { GOOGLE_API_KEY } from '$env/static/private';
 import { eq, desc } from 'drizzle-orm';
 
@@ -45,6 +45,7 @@ export const actions: Actions = {
 		const formData = await request.formData();
 		const uploadedEntries = formData.getAll('files');
 		const selectedModel = formData.get('model')?.toString() || 'gemini-flash-latest';
+		const numberOfPeriods = parseInt(formData.get('periods')?.toString() || '1');
 		
 		const attachments = await Promise.all(
 			uploadedEntries
@@ -73,7 +74,7 @@ export const actions: Actions = {
 		});
 
 		contents.push({
-			text: mainPrompt
+			text: getMainPrompt(numberOfPeriods)
 		});
 
 		const ai = new GoogleGenAI({
