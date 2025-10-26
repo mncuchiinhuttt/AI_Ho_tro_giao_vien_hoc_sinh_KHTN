@@ -78,6 +78,7 @@ Discuss misconceptions, language challenges, supports like visuals, scaffolding,
 - Always generate at least 15 total questions across all exercises.  
 - Always generate the full answers for all homework questions in the lesson_plan section, but never include answers in the study_content section.
 - If any homework exercise involves matching, fill-in-the-table, categorizing, comparison, or classification activities, they must be formatted as tables, not bullet lists or plain text. Each table must have clear column headers that describe task categories (e.g., ‘Term’, ‘Definition’, ‘Answer’, ‘Category’, etc.). The same table format must appear identically in both the lesson_plan and study_content versions (but without answers in the study_content).
+- Include a variety of exercise types whenever possible to enhance student engagement and assessment diversity. Tasks may include multiple‑choice questions, short‑answer tasks, open‑ended reasoning prompts, diagram labeling, calculation problems, vocabulary usage, and contextual applications related to the scientific topic. Ensure all exercises remain aligned with the lesson’s learning objectives and CEFR B2 language level.
 
 8. Appendix (if experiments involved)
 Present experimental data clearly in tables.
