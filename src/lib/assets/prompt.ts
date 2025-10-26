@@ -71,6 +71,7 @@ Discuss misconceptions, language challenges, supports like visuals, scaffolding,
 - The 5E timing within each period must sum to 45 minutes exactly. Never accumulate timing to 90 minutes or more for multi-period lessons; instead, each period operates independently.
 - Provide the 5E table columns in this exact sequence: Time, Objectives, Content & Student Products, Teacher Activities, Student Activities, Teaching Content.
 - Distribute the overall lesson content sections approximately evenly across the ${numberOfPeriods} periods. For example, if the lesson has four main sections and there are two periods, assign two sections to Period 1 and two sections to Period 2.
+- Propose a greater variety of in-class activities to promote diverse forms of student engagement, including experiments, short creative tasks, collaborative discussion, AI-supported visualization, vocabulary practice, and real-world problem solving. Ensure these varied activities align closely with each 5E stage and the lesson’s learning objectives.
 
 7. Homework
 - Clearly present consolidation exercises as individual items labeled Exercise 1, Exercise 2, Exercise 3, … with bold text for the “Exercise 1”, “Exercise 2”, “Exercise 3”, … These can involve diagrams, English descriptions, calculations, or short tasks. For each exercise, use a numbered label rather than a bullet or table. Write the exercise description following the label. If needed, include specific instructions or formulas using the required math formatting (...).
