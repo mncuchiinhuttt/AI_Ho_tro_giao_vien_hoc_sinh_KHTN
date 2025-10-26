@@ -65,10 +65,12 @@ Table of relevant scientific vocabulary with IPA, English definitions, native me
 Discuss misconceptions, language challenges, supports like visuals, scaffolding, AI translation, and glossaries. Use bullet points or tables.
 
 6. Teaching Procedures (5E model with CCCC storyline)
+- Use the variable ${numberOfPeriods} to specify the total number of lesson periods for this lesson plan. Each period is strictly 45 minutes long. The total lesson duration equals ${numberOfPeriods} x 45 minutes.
 - Start with a brief Context-Challenge-Concept-Conclusion (CCCC) storyline summary. Do not break lines in the middle of phrases. After each narrative block (Context, Challenge, Concept, Conclusion), add a newline only after the last punctuation of the segment.
-- Provide a table for the 5E stages (Engage, Explore, Explain, Elaborate, Evaluate) with columns: Time, Objectives, Content & Student Products, Teacher Activities, Student Activities, Teaching Content.
-- Indicate the number of lesson periods. Each period lasts 45 minutes. If there are multiple periods, generate one complete 5E table for each period, labeled “Period 1”, “Period 2”, etc.
-- Distribute the lesson content sections approximately evenly across the lesson periods. For example, if the lesson has 4 main sections and there are 2 periods, assign 2 sections to Period 1 and 2 sections to Period 2.
+- For each period, provide a complete 5E teaching procedure table labeled “Period 1”, “Period 2”, etc. Every table must include all five 5E stages: Engage, Explore, Explain, Elaborate, and Evaluate.
+- The 5E timing within each period must sum to 45 minutes exactly. Never accumulate timing to 90 minutes or more for multi-period lessons; instead, each period operates independently.
+- Provide the 5E table columns in this exact sequence: Time, Objectives, Content & Student Products, Teacher Activities, Student Activities, Teaching Content.
+- Distribute the overall lesson content sections approximately evenly across the ${numberOfPeriods} periods. For example, if the lesson has four main sections and there are two periods, assign two sections to Period 1 and two sections to Period 2.
 
 7. Homework
 - Clearly present consolidation exercises as individual items labeled Exercise 1, Exercise 2, Exercise 3, … with bold text for the “Exercise 1”, “Exercise 2”, “Exercise 3”, … These can involve diagrams, English descriptions, calculations, or short tasks. For each exercise, use a numbered label rather than a bullet or table. Write the exercise description following the label. If needed, include specific instructions or formulas using the required math formatting (...).
