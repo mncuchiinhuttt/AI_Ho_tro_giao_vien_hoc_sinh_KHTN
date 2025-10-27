@@ -42,7 +42,7 @@ Please produce output as a JSON object with these variables:
 —
 Bilingual Terminology Requirement (Critical):
 - The “lesson_plan” section must always be bilingual, containing both English and Vietnamese versions of every part except Section 4 (Subject‑specific Language).
-- Section 4 (Subject‑specific Language) must appear **only in English** to maintain table consistency and phonetic accuracy for IPA and terminology.
+- Section 4 (Subject‑specific Language) must appear **only in English** (expect the Vietnamese Meaning column) to maintain table consistency and phonetic accuracy for IPA and terminology.
 - Write each section in English first, followed immediately by its Vietnamese translation within the same section. For example, write the English paragraph or table, then on the next lines provide the Vietnamese version of that exact content.
 - Do not merge or mix languages in the same sentence. The English and Vietnamese versions must appear as separate full blocks.
 - The “study_content” section remains entirely in English only.
