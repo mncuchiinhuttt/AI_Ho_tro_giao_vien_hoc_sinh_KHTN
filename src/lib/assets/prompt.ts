@@ -3,7 +3,7 @@ You are an expert educator tasked with writing a detailed CLIL lesson plan and a
 
 —
 General Information:
-- Number of periods: ${numberOfPeriods}
+- Number of period: ${numberOfPeriods}
 
 —
 Strict Formatting Requirements:
@@ -41,6 +41,12 @@ Please produce output as a JSON object with these variables:
 
 —
 Bilingual Terminology Requirement (Critical):
+- The “lesson_plan” section must always be bilingual, containing both English and Vietnamese versions of every part except Section 4 (Subject‑specific Language).
+- Section 4 (Subject‑specific Language) must appear **only in English** to maintain table consistency and phonetic accuracy for IPA and terminology.
+- Write each section in English first, followed immediately by its Vietnamese translation within the same section. For example, write the English paragraph or table, then on the next lines provide the Vietnamese version of that exact content.
+- Do not merge or mix languages in the same sentence. The English and Vietnamese versions must appear as separate full blocks.
+- The “study_content” section remains entirely in English only.
+- Ensure that all bilingual text still follows CLIL clarity, CEFR B2 vocabulary restriction (except technical terms), and the full Markdown formatting rules specified above.
 - You must always insert the Vietnamese translation for every subject-specific technical term listed in the vocabulary array immediately after its first appearance in narrative content, tables, or equations, in unformatted parentheses, like: "State parameter (thông số trạng thái)".
 - Always enforce this rule across both the lesson_plan and study_content content for every new section, without exception. Do not add the Vietnamese meaning again for further appearances of the same term in that context.
 - Use exactly the "vietnamese" value from each vocabulary entry for the translation.
@@ -65,22 +71,34 @@ Table of relevant scientific vocabulary with IPA, English definitions, native me
 Discuss misconceptions, language challenges, supports like visuals, scaffolding, AI translation, and glossaries. Use bullet points or tables.
 
 6. Teaching Procedures (5E model with CCCC storyline)
-- Use the variable ${numberOfPeriods} to specify the total number of lesson periods for this lesson plan. Each period is strictly 45 minutes long. The total lesson duration equals ${numberOfPeriods} x 45 minutes.
+- Use the variable ${numberOfPeriods} to specify the total number of lesson periods for this lesson plan. Each period is strictly 45 minutes long. The total lesson duration equals ${numberOfPeriods} × 45 minutes.
 - Start with a brief Context-Challenge-Concept-Conclusion (CCCC) storyline summary. Do not break lines in the middle of phrases. After each narrative block (Context, Challenge, Concept, Conclusion), add a newline only after the last punctuation of the segment.
 - For each period, provide a complete 5E teaching procedure table labeled “Period 1”, “Period 2”, etc. Every table must include all five 5E stages: Engage, Explore, Explain, Elaborate, and Evaluate.
 - The 5E timing within each period must sum to 45 minutes exactly. Never accumulate timing to 90 minutes or more for multi-period lessons; instead, each period operates independently.
 - Provide the 5E table columns in this exact sequence: Time, Objectives, Content & Student Products, Teacher Activities, Student Activities, Teaching Content.
-- Distribute the overall lesson content sections approximately evenly across the ${numberOfPeriods} periods. For example, if the lesson has four main sections and there are two periods, assign two sections to Period 1 and two sections to Period 2.
+- Distribute the overall lesson content sections approximately evenly across the ${numberOfPeriods} periods. For example, if the lesson has four main sections and there are two periods, assign two sections to Period 1 and two sections to Period 2.
 - Propose a greater variety of in-class activities to promote diverse forms of student engagement, including experiments, short creative tasks, collaborative discussion, AI-supported visualization, vocabulary practice, and real-world problem solving. Ensure these varied activities align closely with each 5E stage and the lesson’s learning objectives.
 
-7. Homework
-- Clearly present consolidation exercises as individual items labeled Exercise 1, Exercise 2, Exercise 3, … with bold text for the “Exercise 1”, “Exercise 2”, “Exercise 3”, … These can involve diagrams, English descriptions, calculations, or short tasks. For each exercise, use a numbered label rather than a bullet or table. Write the exercise description following the label. If needed, include specific instructions or formulas using the required math formatting (...).
-- Always generate at least 15 total questions across all exercises.  
-- Always generate the full answers for all homework questions in the lesson_plan section, but never include answers in the study_content section.
-- If any homework exercise involves matching, fill-in-the-table, categorizing, comparison, or classification activities, they must be formatted as tables, not bullet lists or plain text. Each table must have clear column headers that describe task categories (e.g., ‘Term’, ‘Definition’, ‘Answer’, ‘Category’, etc.). The same table format must appear identically in both the lesson_plan and study_content versions (but without answers in the study_content).
-- Include a variety of exercise types whenever possible to enhance student engagement and assessment diversity. Tasks may include multiple‑choice questions, short‑answer tasks, open‑ended reasoning prompts, diagram labeling, calculation problems, vocabulary usage, and contextual applications related to the scientific topic. Ensure all exercises remain aligned with the lesson’s learning objectives and CEFR B2 language level.
+7. Preparation for Students
+- Present preparatory tasks, warm-up questions, and pre-learning activities for students to complete before or during the lesson. Label these items as Preparation 1, Preparation 2, Preparation 3, … with bold text for the “Preparation” label.
+- Each preparation activity may include reading comprehension, vocabulary preview, short video analysis, observation, or brainstorming. Use numbered lists (1., 2., 3., …) under each Preparation block.
+- Always include clear instructions and estimated time for each activity.
+- Any matching, fill‑in‑table, categorizing, or comparison preparation activities must be formatted as tables, with clear headers like “Term”, “Definition”, “Answer”, or “Category”.  
+- Always provide the correct answers or key ideas for these preparations in the lesson_plan but do not include answers in the study_content.
+- Include a variety of activity types whenever possible: multiple-choice questions, visual identification, short written responses, collaborative discussion tasks, or AI‑based simulations. Ensure all activities remain aligned with the lesson objectives and CEFR B2 vocabulary level.
 
-8. Appendix (if experiments involved)
+8. Homework (After-class Tasks)
+- Present after‑class homework clearly as individual exercises labeled Exercise 1, Exercise 2, Exercise 3, … with bold text for “Exercise ” labels.
+- Each exercise must contain at least 5 individual questions (1., 2., 3., …) or tasks.  
+- The homework must reinforce, extend, or apply the lesson’s key learning objectives in practical contexts. Tasks should encourage reflection, problem solving, or creativity.  
+- Always generate at least 15 total questions across all exercises.  
+- Generate the full answers for all homework questions in the lesson_plan section, but never include answers in the study_content section.  
+- If any exercise involves matching, categorization, or data-based tasks, use tables with column headers (e.g., “Term”, “Definition”, “Answer”, etc.).  
+- Include diverse tasks where possible, such as multiple‑choice questions, real‑world applications, experiments, creative explanations, vocabulary practice, or brief written reflections.  
+- Ensure the language used remains under CEFR B2 level (except for technical terms in the vocabulary array).  
+- The “Homework (After-class Tasks)” section appears **only in the lesson_plan**, not in the study_content.
+
+9. Appendix (if experiments involved)
 Present experimental data clearly in tables.
 
 —
@@ -88,9 +106,10 @@ Study Document Requirements (study_content)
 1. Start with the lesson title as a level-1 Markdown heading.
 2. Provide a brief summary summarizing the main content of the lesson in clear, simple English.
 3. Produce concise English summaries for each original document section, preserving the number of sections and structure (except vocabulary).
-4. Homework section including the same labeled exercises as in lesson_plan
-5. End with a vocabulary table listing each key word with IPA, short English definition, and short Vietnamese meaning.
-6. Use Markdown headings and tables for clarity.
+4. Include a “Preparation for Students” section instead of “Homework,” presenting the same preparatory tasks as listed in the lesson_plan, with identical numbering, structure, and format, but without answers.
+5. The “Homework (After-class Tasks)” section appears only in the lesson_plan and must not appear in the study_content.
+6. End with a vocabulary table listing each key word with IPA, short English definition, and short Vietnamese meaning.
+7. Use Markdown headings and tables for clarity.
 
 —
 Homework Task Rule (Critical):
@@ -138,5 +157,4 @@ JSON Output Schema:
 \`\`\`
 `;
 
-// Backward compatibility: default export with 1 period
 export const mainPrompt = getMainPrompt(1);
