@@ -156,7 +156,7 @@
 
 					{#if vocabulary.length > 0}
 						<div class="relative">
-							<Carousel class="px-2 ml-20 mr-20">
+							<Carousel class="md:px-2 md:mx-10">
 								<CarouselContent class="py-4">
 									{#each vocabulary as item, index}
 										{#key `${index}-${item.word}`}
@@ -197,7 +197,7 @@
 																Reveal meaning
 															</span>
 														</div>
-														<div class="absolute inset-0 flex flex-col justify-center gap-3 rounded-2xl bg-gradient-to-br from-teal-500 to-cyan-500 p-6 text-white shadow-xl [backface-visibility:hidden] [transform:rotateY(180deg)]">
+														<div class="absolute inset-0 flex flex-col justify-start gap-3 overflow-y-auto rounded-2xl bg-gradient-to-br from-teal-500 to-cyan-500 p-6 text-white shadow-xl [backface-visibility:hidden] [transform:rotateY(180deg)]">
 															<p class="text-xs font-bold uppercase tracking-wide text-teal-100">English meaning</p>
 															<p class="text-base font-semibold">{item.english}</p>
 															<p class="text-xs font-bold uppercase tracking-wide text-teal-100">Vietnamese meaning</p>
@@ -210,10 +210,20 @@
 									{/each}
 								</CarouselContent>
 								{#if vocabulary.length > 1}
+									<!-- Desktop: Side arrows -->
 									<CarouselPrevious class="hidden sm:flex bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-600 hover:to-cyan-600 border-2 border-teal-300" />
 									<CarouselNext class="hidden sm:flex bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-600 hover:to-cyan-600 border-2 border-teal-300" />
 								{/if}
+
+								{#if vocabulary.length > 1}
+									<!-- Mobile: Bottom arrows -->
+									<div class="flex sm:hidden justify-center gap-4 mt-4">
+										<CarouselPrevious class="static transform-none bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-600 hover:to-cyan-600 border-2 border-teal-300" />
+										<CarouselNext class="static transform-none bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-600 hover:to-cyan-600 border-2 border-teal-300" />
+									</div>
+								{/if}
 							</Carousel>
+							
 						</div>
 					{:else}
 						<div class="flex h-48 flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-white text-center text-sm text-gray-500 shadow-sm">
