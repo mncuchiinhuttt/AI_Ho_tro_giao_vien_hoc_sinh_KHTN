@@ -446,11 +446,3 @@ This project is distributed under the MIT License. See the [LICENSE](LICENSE) fi
 - All educators and students using Science Bridge AI
 
 ---
-
-<div align="center">
-
-**Made with ❤️ to empower educators and students worldwide**
-
-If this project helped you, please consider giving it a ⭐ on GitHub!
-
-</div>
