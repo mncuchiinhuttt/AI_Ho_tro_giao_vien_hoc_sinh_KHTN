@@ -21,7 +21,7 @@
 		const formData = new FormData(formElement);
 
 		try {
-			const response = await fetch('?/login', {
+			const response = await fetch('/login?/login', {
 				method: 'POST',
 				body: formData,
 				credentials: 'same-origin'

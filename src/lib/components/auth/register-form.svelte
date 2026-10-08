@@ -28,7 +28,7 @@
 			formData.set('role', 'user');
 
 		try {
-			const response = await fetch('?/register', {
+			const response = await fetch('/login?/register', {
 				method: 'POST',
 				body: formData,
 				credentials: 'same-origin'
