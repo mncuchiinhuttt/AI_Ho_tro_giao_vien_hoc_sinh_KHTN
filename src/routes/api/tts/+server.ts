@@ -1,22 +1,9 @@
-import gTTS from "gtts";
-import type { RequestHandler } from "@sveltejs/kit";
-
-const DEFAULT_LANG = "en";
-
-const streamToBuffer = async (text: string, lang: string) => {
-	return await new Promise<Buffer>((resolve, reject) => {
-		const chunks: Buffer[] = [];
-		const stream = new gTTS(text, lang).stream();
-
-		stream.on("data", (chunk: Buffer) => chunks.push(chunk));
-		stream.once("end", () => resolve(Buffer.concat(chunks)));
-		stream.once("error", (error: unknown) => reject(error));
-	});
-};
+import type { RequestHandler } from '@sveltejs/kit';
+import { generateSpeechBuffer } from '$lib/features/speech';
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
-		const { word, lang = DEFAULT_LANG } = await request.json();
+		const { word, lang = 'en' } = await request.json();
 
 		if (typeof word !== "string" || !word.trim()) {
 			return new Response(JSON.stringify({ error: "Word is required" }), {
@@ -25,8 +12,8 @@ export const POST: RequestHandler = async ({ request }) => {
 			});
 		}
 
-		const normalizedLang = typeof lang === "string" && lang.trim() ? lang.trim() : DEFAULT_LANG;
-		const audioBuffer = await streamToBuffer(word.trim(), normalizedLang);
+		const normalizedLang = typeof lang === 'string' && lang.trim() ? lang.trim() : 'en';
+		const audioBuffer = await generateSpeechBuffer(word.trim(), normalizedLang);
 		const audioArray = new Uint8Array(audioBuffer);
 
 		return new Response(audioArray, {
