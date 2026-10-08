@@ -114,10 +114,10 @@
 	<Button
 		type="button"
 		onclick={handleRegister}
-		class="w-full bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-600 hover:to-cyan-600"
+		class="w-full h-11 rounded-xl bg-slate-950 text-white font-medium hover:bg-slate-900 transition-colors shadow-sm"
 		disabled={isSubmitting}
 		aria-busy={isSubmitting}
 	>
-		{isSubmitting ? 'Creating account…' : 'Create account'}
+		{isSubmitting ? 'Creating account…' : 'Create Account'}
 	</Button>
 </form>
