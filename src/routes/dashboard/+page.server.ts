@@ -5,9 +5,8 @@ import { db } from '$lib/server/db';
 import * as table from '$lib/server/db/schema';
 import { generateLessonId } from '$lib/server/auth/utils';
 import { Buffer } from 'node:buffer';
-import { GoogleGenAI, Type } from "@google/genai";
 import { getMainPrompt } from '$lib/assets/prompt';
-import { GOOGLE_API_KEY } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 import { eq, desc } from 'drizzle-orm';
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -44,8 +43,15 @@ export const actions: Actions = {
 
 		const formData = await request.formData();
 		const uploadedEntries = formData.getAll('files');
-		const selectedModel = formData.get('model')?.toString() || 'gemini-flash-latest';
-		const numberOfPeriods = parseInt(formData.get('periods')?.toString() || '1');
+		const selectedModel =
+			formData.get('model')?.toString() ||
+			env.AI_MODEL ||
+			'gemini-3.8-flash';
+		const numberOfPeriods = parseInt(
+			formData.get('numberOfPeriods')?.toString() ||
+			formData.get('periods')?.toString() ||
+			'1'
+		);
 		
 		const attachments = await Promise.all(
 			uploadedEntries
@@ -62,96 +68,111 @@ export const actions: Actions = {
 			return fail(400, { message: 'Please attach at least one file.' });
 		}
 
-		let contents = [];
+		const userContent: Array<
+			| { type: 'text'; text: string }
+			| { type: 'image_url'; image_url: { url: string } }
+		> = [];
 
-		attachments.forEach((file) => {
-			contents.push({
-				inlineData: {
-					mimeType: file.type,
-					data: file.buffer.toString('base64')
-				}
-			});
-		});
-
-		contents.push({
+		userContent.push({
+			type: 'text',
 			text: getMainPrompt(numberOfPeriods)
 		});
 
-		const ai = new GoogleGenAI({
-			apiKey: GOOGLE_API_KEY
-		});
-
-		let response;
-		try {
-			response = await ai.models.generateContent({
-				model: selectedModel,
-				contents: contents,
-				config: {
-					responseMimeType: 'application/json',
-					responseSchema: {
-						type: Type.OBJECT,
-						properties: {
-							study_content: {
-								type: Type.STRING
-							},
-							vocabulary: {
-								type: Type.ARRAY,
-								items: {
-									type: Type.OBJECT,
-									properties: {
-										word: { type: Type.STRING },
-										ipa: { type: Type.STRING },
-										english: { type: Type.STRING },
-										vietnamese: { type: Type.STRING }
-									},
-									required: ['word', 'ipa', 'english', 'vietnamese'],
-									propertyOrdering: ['word', 'ipa', 'english', 'vietnamese']
-								}
-							},
-							lesson_plan: {
-								type: Type.STRING
-							},
-							title: {
-								type: Type.STRING
-							}
-						},
-						required: ['study_content', 'vocabulary', 'lesson_plan', 'title'],
-						propertyOrdering: ['title', 'lesson_plan', 'study_content', 'vocabulary']
-					}
+		attachments.forEach((file) => {
+			const base64Data = file.buffer.toString('base64');
+			const mimeType = file.type || 'application/octet-stream';
+			userContent.push({
+				type: 'image_url',
+				image_url: {
+					url: `data:${mimeType};base64,${base64Data}`
 				}
 			});
+		});
+
+		const aiBaseUrl = (env.AI_BASE_URL || 'https://mnrouter.mncuchiinhuttt.dev/v1').replace(/\/+$/, '');
+		const aiApiKey = env.AI_API_KEY || 'mr_jjvbKlOeu8IE4o5L87FqK4nS0pis36eyRdxPtJN9w0u';
+
+		let rawContent = '';
+		try {
+			const aiResponse = await fetch(`${aiBaseUrl}/chat/completions`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${aiApiKey}`
+				},
+				body: JSON.stringify({
+					model: selectedModel,
+					messages: [
+						{
+							role: 'user',
+							content: userContent
+						}
+					],
+					response_format: { type: 'json_object' }
+				})
+			});
+
+			if (!aiResponse.ok) {
+				const errorText = await aiResponse.text();
+				console.error('AI provider error:', aiResponse.status, errorText);
+				return fail(503, { message: 'AI provider error. Please try again later.' });
+			}
+
+			const completion = await aiResponse.json();
+			rawContent = completion?.choices?.[0]?.message?.content || '';
 		} catch (e) {
-			console.error(e);
-			return fail(503, { message: 'Gemini is currently unavailable. Please try again later.' });
+			console.error('AI fetch error:', e);
+			return fail(503, { message: 'AI service is currently unavailable. Please try again later.' });
 		}
 
-		if (!response.candidates || response.candidates.length === 0) {
-			throw fail(503, { message: 'Gemini is currently unavailable. Please try again later.' });
+		if (!rawContent) {
+			return fail(500, { message: 'AI returned an empty response.' });
 		}
 
-		const candidate = response.candidates?.[0];
-		const textPart = candidate?.content?.parts?.find(
-			(part): part is { text: string } => typeof (part as any).text === 'string'
-		)?.text;
-
-		if (!textPart) {
-			throw fail(500, { message: 'Gemini returned no text response' });
+		let cleanJson = rawContent.trim();
+		const footerIndex = cleanJson.lastIndexOf('> Cảm ơn bạn đã sử dụng mnRouter');
+		if (footerIndex !== -1) {
+			cleanJson = cleanJson.substring(0, footerIndex).trim();
+		}
+		const markdownBlockMatch = cleanJson.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
+		if (markdownBlockMatch) {
+			cleanJson = markdownBlockMatch[1].trim();
 		}
 
-		const aiResponse = JSON.parse(textPart);
+		let aiParsed: {
+			title?: string;
+			lesson_plan?: string;
+			study_content?: string;
+			vocabulary?: Array<{
+				word: string;
+				ipa: string;
+				english: string;
+				vietnamese: string;
+			}>;
+		};
+
+		try {
+			aiParsed = JSON.parse(cleanJson);
+		} catch (parseError) {
+			console.error('Failed to parse AI JSON:', parseError, cleanJson);
+			return fail(500, { message: 'Failed to parse AI response as JSON.' });
+		}
+
+		if (!aiParsed.title || !aiParsed.lesson_plan || !aiParsed.study_content) {
+			return fail(500, { message: 'AI response missing required fields.' });
+		}
 
 		const lessonId = generateLessonId();
 
 		await db.insert(table.lesson).values({
 			id: lessonId,
 			creatorId: locals.user.id,
-			title: aiResponse.title,
-			lessonContent: aiResponse.lesson_plan,
-			studyContent: aiResponse.study_content,
-			vocabulary: aiResponse.vocabulary,
+			title: aiParsed.title,
+			lessonContent: aiParsed.lesson_plan,
+			studyContent: aiParsed.study_content,
+			vocabulary: aiParsed.vocabulary ?? [],
 			createdAt: new Date()
 		});
-
 		return {
 			success: true,
 			lessonId

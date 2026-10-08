@@ -7,6 +7,7 @@
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
+		"start": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
@@ -26,7 +27,6 @@
 		"@oslojs/crypto": "^1.0.1",
 		"@oslojs/encoding": "^1.1.0",
 		"@sveltejs/adapter-auto": "^6.1.0",
-		"@sveltejs/adapter-node": "^5.4.0",
 		"@sveltejs/kit": "^2.43.2",
 		"@sveltejs/vite-plugin-svelte": "^6.2.0",
 		"@tailwindcss/vite": "^4.1.13",
@@ -47,6 +47,7 @@
 		"prettier-plugin-svelte": "^3.4.0",
 		"prettier-plugin-tailwindcss": "^0.6.14",
 		"svelte": "^5.39.5",
+		"svelte-adapter-bun": "^1.0.1",
 		"svelte-check": "^4.3.2",
 		"svelte-sonner": "^1.0.5",
 		"tailwind-merge": "^3.3.1",
@@ -59,7 +60,6 @@
 		"vite-plugin-devtools-json": "^1.0.0"
 	},
 	"dependencies": {
-		"@google/genai": "^1.26.0",
 		"@neondatabase/serverless": "^1.0.1",
 		"@node-rs/argon2": "^2.0.2",
 		"docx": "^9.5.1",

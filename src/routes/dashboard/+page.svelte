@@ -25,7 +25,7 @@
 	let dragDepth = 0;
 	let submissionState = $state<'idle' | 'creating' | 'complete'>('idle');
 	let lessonLink = $state('');
-	let selectedModel = $state<string>('');
+	let selectedModel = $state<string>('gemini-3.8-flash');
 	let numberOfPeriods = $state<number>(1);
 
 	const formatFileSize = (size: number) => {
@@ -231,18 +231,15 @@
 						</label>
 						<Select type="single" bind:value={selectedModel} disabled={submissionState === 'creating'}>
 							<SelectTrigger id="model-select" class="w-full bg-white border-gray-200 hover:bg-gray-50 focus:ring-2 focus:ring-teal-300">
-								{#if selectedModel === 'gemini-flash-latest'}
-									✨ Gemini Flash (Fast & Efficient)
-								{:else if selectedModel === 'gemini-2.5-pro'}
-									🚀 Gemini 2.5 Pro (Most Powerful)
+								{#if selectedModel === 'gemini-3.8-flash'}
+									⚡ Gemini 3.8 Flash (mnRouter)
 								{:else}
 									Select your AI model
 								{/if}
 							</SelectTrigger>
 							<SelectContent>
 								<SelectLabel>Available Models</SelectLabel>
-								<SelectItem value="gemini-flash-latest">✨ Gemini Flash - Fast & Efficient</SelectItem>
-								<SelectItem value="gemini-2.5-pro">🚀 Gemini 2.5 Pro - Most Powerful</SelectItem>
+								<SelectItem value="gemini-3.8-flash">⚡ Gemini 3.8 Flash (Recommended)</SelectItem>
 							</SelectContent>
 						</Select>
 					</div>

@@ -73,8 +73,7 @@ Science Bridge AI dramatically reduces preparation time while ensuring both teac
 - **[@oslojs/crypto](https://github.com/pilcrowonpaper/oslojs)** - Cryptographic utilities
 
 ### AI & Content Generation
-- **[Google Gemini](https://deepmind.google/technologies/gemini/)** - Advanced AI model for content generation
-- **[@google/genai](https://www.npmjs.com/package/@google/genai)** - Official Google GenAI SDK
+- **[mnRouter AI Gateway](https://mnrouter.mncuchiinhuttt.dev)** - High-speed OpenAI-compatible gateway (`gemini-3.8-flash`)
 - **[docx](https://docx.js.org/)** - Generate `.docx` documents programmatically
 - **[gTTS](https://pypi.org/project/gTTS/)** - Google Text-to-Speech for audio pronunciation
 
@@ -91,8 +90,7 @@ Science Bridge AI dramatically reduces preparation time while ensuring both teac
 
 ### Prerequisites
 
-- **Node.js** v18 or higher
-- **npm**, **pnpm**, or **yarn** package manager
+- **Bun** v1.0 or higher (or Node.js v18+)
 - Google Gemini API key ([Get one here](https://ai.google.dev/))
 - Neon database account ([Create here](https://neon.tech/))
 
@@ -105,13 +103,7 @@ Science Bridge AI dramatically reduces preparation time while ensuring both teac
    ```
 
 2. **Install dependencies**
-   ```bash
-   npm install
-   # or
-   pnpm install
-   # or
-   yarn install
-   ```
+   bun install
 
 3. **Set up environment variables**
    
@@ -132,12 +124,12 @@ Science Bridge AI dramatically reduces preparation time while ensuring both teac
    
    Push your database schema to Neon:
    ```bash
-   npm run db:push
+   bun run db:push
    ```
 
 5. **Run the development server**
    ```bash
-   npm run dev
+   bun run dev
    ```
 
    Open your browser and navigate to `http://localhost:5173`
@@ -327,20 +319,20 @@ Vercel provides the easiest deployment experience for SvelteKit applications:
 Create a `Dockerfile`:
 
 ```dockerfile
-FROM node:18-alpine
+FROM oven/bun:1-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci
+COPY package.json bun.lock* ./
+RUN bun install --frozen-lockfile
 
 COPY . .
 
-RUN npm run build
+RUN bun run build
 
 ENV NODE_ENV=production
 
-CMD ["node", "build"]
+CMD ["bun", "./build/index.js"]
 ```
 
 Build and run:
