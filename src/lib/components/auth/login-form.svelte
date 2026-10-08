@@ -32,20 +32,23 @@
 				return;
 			}
 
-			if (response.ok) {
-				const redirectLocation = response.headers.get('x-sveltekit-location');
-				if (redirectLocation) {
-					await goto(redirectLocation);
-					return;
-				}
+			const data = await response.json().catch(() => null);
 
-				await goto('/dashboard');
-				
-				toast.success('Login successful!');
+			if (data?.type === 'redirect' && data.location) {
+				window.location.href = data.location;
 				return;
 			}
 
-			const data = await response.json().catch(() => null);
+			if (data?.type === 'failure') {
+				toast.error(data?.data?.message ?? 'Incorrect username or password.');
+				return;
+			}
+
+			if (response.ok) {
+				window.location.href = '/dashboard';
+				return;
+			}
+
 			toast.error(data?.message ?? 'Incorrect username or password.');
 		} catch (error) {
 			console.error('login request failed', error);

@@ -39,18 +39,23 @@
 				return;
 			}
 
-			if (response.ok) {
-				const redirectLocation = response.headers.get('x-sveltekit-location');
-				if (redirectLocation) {
-					await goto(redirectLocation);
-					return;
-				}
-				toast.success('Registration successful!');
-				await goto('/dashboard');
+			const data = await response.json().catch(() => null);
+
+			if (data?.type === 'redirect' && data.location) {
+				window.location.href = data.location;
 				return;
 			}
 
-			const data = await response.json().catch(() => null);
+			if (data?.type === 'failure') {
+				toast.error(data?.data?.message ?? 'Unable to create account. Please review your details.');
+				return;
+			}
+
+			if (response.ok) {
+				window.location.href = '/dashboard';
+				return;
+			}
+
 			toast.error(data?.message ?? 'Unable to create account. Please review your details.');
 		} catch (error) {
 			console.error('register request failed', error);
